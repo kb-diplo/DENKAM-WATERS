@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Welcome to the Water Billing System</h1>
+{% if user.is_authenticated %}
+    <p>Hello, {{ user.username }}!</p>
+    {% if user.role == 'supplier' %}
+        <a href="{% url 'customer_list' %}" class="btn btn-primary">Manage Customers</a>
+    {% else %}
+        <a href="{% url 'billing_history' %}" class="btn btn-primary">View Billing History</a>
+    {% endif %}
+{% else %}
+    <p>Please <a href="{% url 'login' %}">login</a> or <a href="{% url 'register' %}">register</a> to continue.</p>
+{% endif %}
+{% endblock %}
