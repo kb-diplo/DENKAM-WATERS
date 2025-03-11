@@ -1,6 +1,9 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from .models import Customer, Bill, Payment
+from customers.models import Customer
+from billing.models import Bill  
+from payments.models import Payment
+
 
 @login_required
 def customer_dashboard(request):
