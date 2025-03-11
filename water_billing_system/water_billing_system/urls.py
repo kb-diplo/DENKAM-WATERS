@@ -24,4 +24,5 @@ urlpatterns = [
     path('meter-readings/', include('meter_readings.urls')),
     path('customers/', include('customers.urls')),
     path('', home, name='home'),  
+    path('', include('customers.urls')),
 ]

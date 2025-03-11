@@ -2,10 +2,94 @@
 
 {% block content %}
 <h2>Register</h2>
+
+<!-- Display form errors at the top -->
+{% if form.errors %}
+    <div class="alert alert-danger">
+        <strong>Error!</strong> Please correct the following:
+        <ul>
+            {% for field, errors in form.errors.items %}
+                {% for error in errors %}
+                    <li>{{ field|title }}: {{ error }}</li>
+                {% endfor %}
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}
+
 <form method="post">
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">Register</button>
+    
+    <!-- Username Field -->
+    <div class="form-group">
+        <label for="id_username">Username</label>
+        <input type="text" name="username" id="id_username" class="form-control" value="{{ form.username.value|default_if_none:'' }}">
+        {% if form.username.errors %}
+            <div class="text-danger">
+                {% for error in form.username.errors %}
+                    <small>{{ error }}</small><br>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Email Field -->
+    <div class="form-group">
+        <label for="id_email">Email</label>
+        <input type="email" name="email" id="id_email" class="form-control" value="{{ form.email.value|default_if_none:'' }}">
+        {% if form.email.errors %}
+            <div class="text-danger">
+                {% for error in form.email.errors %}
+                    <small>{{ error }}</small><br>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Password1 Field -->
+    <div class="form-group">
+        <label for="id_password1">Password</label>
+        <input type="password" name="password1" id="id_password1" class="form-control">
+        {% if form.password1.errors %}
+            <div class="text-danger">
+                {% for error in form.password1.errors %}
+                    <small>{{ error }}</small><br>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Password2 Field -->
+    <div class="form-group">
+        <label for="id_password2">Confirm Password</label>
+        <input type="password" name="password2" id="id_password2" class="form-control">
+        {% if form.password2.errors %}
+            <div class="text-danger">
+                {% for error in form.password2.errors %}
+                    <small>{{ error }}</small><br>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Role Field -->
+    <div class="form-group">
+        <label for="id_role">Role</label>
+        <select name="role" id="id_role" class="form-control">
+            <option value="supplier" {% if form.role.value == "supplier" %}selected{% endif %}>Supplier</option>
+            <option value="customer" {% if form.role.value == "customer" %}selected{% endif %}>Customer</option>
+        </select>
+        {% if form.role.errors %}
+            <div class="text-danger">
+                {% for error in form.role.errors %}
+                    <small>{{ error }}</small><br>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
+   <div><button type="submit" class="btn btn-primary">Register</button></div> 
 </form>
+
 <p>Already have an account? <a href="{% url 'login' %}">Login here</a>.</p>
 {% endblock %}

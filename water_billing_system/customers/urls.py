@@ -2,6 +2,8 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    path('', views.home, name='home'),  # Define the home URL
+    
     # Home page for customers
     path('', views.customer_dashboard, name='customer_dashboard'),
 
