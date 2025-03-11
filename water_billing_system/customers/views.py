@@ -60,3 +60,7 @@ def water_usage(request):
     return render(request, 'customers/water_usage.html', {
         'readings': readings,
     })
+
+
+def home(request):
+    return render(request, 'home.html')
