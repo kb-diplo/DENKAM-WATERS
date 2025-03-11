@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Billing History</h1>
+
+<table>
+    <thead>
+        <tr>
+            <th>Billing Period</th>
+            <th>Usage</th>
+            <th>Amount Due</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for bill in bills %}
+        <tr>
+            <td>{{ bill.billing_period }}</td>
+            <td>{{ bill.usage }}</td>
+            <td>{{ bill.amount_due }}</td>
+            <td>{{ bill.status }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

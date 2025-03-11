@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Account Management</h1>
+
+<p><strong>Name:</strong> {{ customer.name }}</p>
+<p><strong>Address:</strong> {{ customer.address }}</p>
+<p><strong>Contact:</strong> {{ customer.contact }}</p>
+<p><strong>Meter ID:</strong> {{ customer.meter_id }}</p>
+
+<a href="{% url 'update_account' %}" class="btn btn-primary">Update Account</a>
+{% endblock %}

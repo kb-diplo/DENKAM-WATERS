@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Welcome, {{ customer.name }}!</h1>
+
+<h2>Recent Bills</h2>
+<ul>
+    {% for bill in bills %}
+    <li>
+        <strong>Billing Period:</strong> {{ bill.billing_period }}<br>
+        <strong>Amount Due:</strong> {{ bill.amount_due }}<br>
+        <strong>Status:</strong> {{ bill.status }}
+    </li>
+    {% endfor %}
+</ul>
+
+<h2>Recent Payments</h2>
+<ul>
+    {% for payment in payments %}
+    <li>
+        <strong>Amount Paid:</strong> {{ payment.amount_paid }}<br>
+        <strong>Payment Date:</strong> {{ payment.payment_date }}<br>
+        <strong>Method:</strong> {{ payment.payment_method }}
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}

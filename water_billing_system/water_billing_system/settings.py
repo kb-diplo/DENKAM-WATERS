@@ -33,18 +33,19 @@ AUTH_USER_MODEL = 'accounts.User'
 # Application definition
 
 INSTALLED_APPS = [
+     'accounts',
+    'customers',
+    'meter_readings',
+    'billing',
+    'payments',
+    'reports',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'accounts',
-    'customers',
-    'meter_readings',
-    'billing',
-    'payments',
-    'reports',
+   
 ]
 
 MIDDLEWARE = [

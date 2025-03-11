@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Water Usage</h1>
+
+<table>
+    <thead>
+        <tr>
+            <th>Reading Date</th>
+            <th>Reading Value</th>
+            <th>Notes</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for reading in readings %}
+        <tr>
+            <td>{{ reading.reading_date }}</td>
+            <td>{{ reading.reading_value }}</td>
+            <td>{{ reading.notes }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
