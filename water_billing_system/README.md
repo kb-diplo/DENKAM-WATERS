@@ -1,6 +1,6 @@
 # Water Billing System
 
-A web application for water suppliers to manage customer information, meter readings, billing, and payments.
+A web application for water suppliers to manage customer information, meter readings, billing and payments.
 
 ## Features
 
