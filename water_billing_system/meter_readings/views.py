@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from .models import MeterReading
 from .forms import MeterReadingForm
 
 def input_meter_reading(request):
@@ -10,3 +11,14 @@ def input_meter_reading(request):
     else:
         form = MeterReadingForm()
     return render(request, 'meter_readings/input.html', {'form': form})
+
+class MeterReadingListView(ListView):
+    model = MeterReading
+    template_name = 'meter_readings/list.html'
+    context_object_name = 'readings'
+
+class MeterReadingCreateView(CreateView):
+    model = MeterReading
+    form_class = MeterReadingForm
+    template_name = 'meter_readings/create.html'
+    success_url = '/meter-readings/'
