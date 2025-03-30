@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from .models import MeterReading
 from .forms import MeterReadingForm
+from django.views.generic import CreateView, ListView
 
 def input_meter_reading(request):
     if request.method == 'POST':
@@ -12,13 +13,14 @@ def input_meter_reading(request):
         form = MeterReadingForm()
     return render(request, 'meter_readings/input.html', {'form': form})
 
-class MeterReadingListView(ListView):
-    model = MeterReading
-    template_name = 'meter_readings/list.html'
-    context_object_name = 'readings'
-
 class MeterReadingCreateView(CreateView):
     model = MeterReading
     form_class = MeterReadingForm
     template_name = 'meter_readings/create.html'
     success_url = '/meter-readings/'
+
+class MeterReadingListView(ListView):
+    model = MeterReading
+    template_name = 'meter_readings/list.html'
+    context_object_name = 'readings'
+    paginate_by = 20
