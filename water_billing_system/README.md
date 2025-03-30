@@ -1,6 +1,8 @@
 # Water Billing System
 
-A web application for water suppliers to manage customer information, meter readings, billing and payments.
+## 📌 Overview
+
+The Denkam Waters Billing System is a comprehensive web application designed to streamline water utility management for suppliers in Kenya while providing self-service capabilities for customers.
 
 ## Features
 
