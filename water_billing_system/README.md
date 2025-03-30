@@ -25,19 +25,19 @@ A web application for water suppliers to manage customer information, meter read
 - Created models for `accounts`, `customers`, `meter_readings`, `billing`, `payments`, and `reports`.
 - Implemented basic user authentication.
 
-  ### Week 2  
+### Week 2  
 #### Completed  
 **Meter Reading System**  
 - Created staff input form with validation  
 - Implemented reading history tracking  
 - Added role-based access control  
 
- **Automated Billing**  
+**Automated Billing**  
 - Developed tariff management system  
 - Implemented bill calculation based on usage  
 - Added status tracking (Pending/Paid/Overdue)  
 
-🛠 **Technical Improvements**  
+**Technical Improvements**  
 - Created data migration for existing records  
 - Added error handling for invalid readings  
 - Implemented success confirmation pages  
