@@ -2,13 +2,16 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('', views.home, name='home'),  # Define the home URL
+    path('', views.home, name='home'),  
     
     # Home page for customers
     path('', views.customer_dashboard, name='customer_dashboard'),
 
     # Billing history
     path('billing-history/', views.billing_history, name='billing_history'),
+
+    #Complete profile
+    path('complete-profile/', views.complete_profile, name='complete_profile'),
 
     # Payment history
     path('payment-history/', views.payment_history, name='payment_history'),
