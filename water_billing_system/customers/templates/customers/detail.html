@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>{{ customer.name }}</h2>
+<p>Meter ID: {{ customer.meter_id }}</p>
+
+<h3>Meter Readings</h3>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Value</th>
+            <th>Notes</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for reading in readings %}
+        <tr>
+            <td>{{ reading.reading_date }}</td>
+            <td>{{ reading.reading_value }}</td>
+            <td>{{ reading.notes }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h3>Billing History</h3>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Period</th>
+            <th>Usage</th>
+            <th>Amount</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for bill in bills %}
+        <tr>
+            <td>{{ bill.billing_period }}</td>
+            <td>{{ bill.usage }} units</td>
+            <td>KES {{ bill.amount_due }}</td>
+            <td>{{ bill.status }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

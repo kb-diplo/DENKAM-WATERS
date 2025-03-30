@@ -1,9 +1,26 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, get_object_or_404
 from customers.models import Customer
 from billing.models import Bill  
 from payments.models import Payment
+from meter_readings.models import MeterReading
 
+@login_required
+def customer_list(request):
+    customers = Customer.objects.all()
+    return render(request, 'customers/list.html', {'customers': customers})
+
+@login_required
+def customer_detail(request, pk):
+    customer = get_object_or_404(Customer, pk=pk)
+    readings = customer.meterreading_set.order_by('-reading_date')
+    bills = customer.bill_set.order_by('-created_at')
+    return render(request, 'customers/detail.html', {
+        'customer': customer,
+        'readings': readings,
+        'bills': bills
+    })
 
 @login_required
 def customer_dashboard(request):
@@ -18,11 +35,13 @@ def customer_dashboard(request):
 
 @login_required
 def billing_history(request):
-    customer = Customer.objects.get(user=request.user)
-    bills = Bill.objects.filter(customer=customer)
-    return render(request, 'customers/billing_history.html', {
-        'bills': bills,
-    })
+    try:
+        customer = Customer.objects.get(user=request.user)
+        bills = Bill.objects.filter(customer=customer)
+        return render(request, 'customers/billing_history.html', {'bills': bills})
+    except Customer.DoesNotExist:
+        # Redirect to profile completion if customer doesn't exist
+        return redirect('complete_profile')  # Or show an error message
 
 @login_required
 def payment_history(request):
