@@ -1,0 +1,9 @@
+"__pycache__/" 
+"*.pyc" 
+"db.sqlite3" 
+*.pyo"
+"*.pyd"
+".env"
+"*.log"
+/local_settings.py
+/migrations/ (except for __init__.py)
