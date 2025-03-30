@@ -23,6 +23,9 @@ def add_meter_reading(request):
     
     return render(request, 'meter_readings/input.html', {'form': form})
 
+def meter_reading_success(request):
+    return render(request, 'meter_readings/success.html')
+
 
 class MeterReadingCreateView(CreateView):
     model = MeterReading
