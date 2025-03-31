@@ -1,5 +1,12 @@
+asgiref==3.8.1
+crispy-bootstrap5==2024.10
 Django==4.2.7
-Pillow==11.1.0
-django-crispy-forms==2.1
+django-crispy-forms==2.3
 django-tables2==2.7.0
+djangorestframework==3.16.0
+pillow==11.1.0
 python-dotenv==1.0.0
+setuptools==78.1.0
+sqlparse==0.5.3
+tzdata==2025.2
+wheel==0.45.1
