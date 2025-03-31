@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h2>Welcome, {{ user.username }}!</h2>
+        <p class="lead">Denkam Waters Billing System</p>
+        
+        {% if user.role == 'supplier' or user.role == 'admin' %}
+            <div class="row mt-4">
+                <div class="col-md-3">
+                    <div class="card text-white bg-primary mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Customers</h5>
+                            <p class="card-text display-4">{{ customer_count }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-success mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">Paid Bills</h5>
+                            <p class="card-text display-4">{{ paid_bills_count }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-warning mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">Pending Bills</h5>
+                            <p class="card-text display-4">{{ pending_bills_count }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-danger mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">Overdue Bills</h5>
+                            <p class="card-text display-4">{{ overdue_bills_count }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+        
+        {% if user.role == 'customer' %}
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Your Recent Bills</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if recent_bills %}
+                                <ul class="list-group">
+                                    {% for bill in recent_bills %}
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            {{ bill.billing_period }}
+                                            <span class="badge bg-{% if bill.status == 'paid' %}success{% else %}warning{% endif %} rounded-pill">
+                                                KES {{ bill.amount_due }}
+                                            </span>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <p>No bills found.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Your Recent Payments</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if recent_payments %}
+                                <ul class="list-group">
+                                    {% for payment in recent_payments %}
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            {{ payment.payment_date|date:"M d, Y" }}
+                                            <span class="badge bg-success rounded-pill">
+                                                KES {{ payment.amount_paid }}
+                                            </span>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <p>No payments found.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
