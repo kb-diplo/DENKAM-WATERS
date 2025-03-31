@@ -1,0 +1,60 @@
+/* Custom styles for Denkam Waters */
+body {
+    background-color: #f8f9fa;
+}
+
+.navbar {
+    margin-bottom: 20px;
+}
+
+.card {
+    margin-bottom: 20px;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.card-header {
+    font-weight: 500;
+}
+
+.table th {
+    font-weight: 500;
+}
+
+.badge {
+    font-weight: 500;
+}
+
+.display-4 {
+    font-size: 2.5rem;
+}
+
+/* Custom colors for Denkam Waters */
+.bg-denkam-primary {
+    background-color: #0d6efd;
+    color: white;
+}
+
+.bg-denkam-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+.bg-denkam-success {
+    background-color: #198754;
+    color: white;
+}
+
+.bg-denkam-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.bg-denkam-warning {
+    background-color: #ffc107;
+    color: black;
+}
+
+.bg-denkam-info {
+    background-color: #0dcaf0;
+    color: black;
+}

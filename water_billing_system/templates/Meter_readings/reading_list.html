@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block title %}Meter Readings{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Meter Readings</h2>
+    <a href="{% url 'meter_readings:reading_create' %}" class="btn btn-primary">
+        <i class="bi bi-plus"></i> Add Reading
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Customer</th>
+                    <th>Meter</th>
+                    <th>Reading</th>
+                    <th>Recorded By</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for reading in readings %}
+                    <tr>
+                        <td>{{ reading.reading_date|date:"M d, Y H:i" }}</td>
+                        <td>{{ reading.meter.customer.name }}</td>
+                        <td>{{ reading.meter.id }}</td>
+                        <td>{{ reading.reading_value }} units</td>
+                        <td>{{ reading.recorded_by.username }}</td>
+                        <td>
+                            <a href="{% url 'meter_readings:reading_detail' reading.pk %}" class="btn btn-sm btn-info">View</a>
+                            <a href="{% url 'meter_readings:reading_update' reading.pk %}" class="btn btn-sm btn-warning">Edit</a>
+                            <a href="{% url 'meter_readings:reading_delete' reading.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center">No meter readings found.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        {% if is_paginated %}
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">Previous</span>
+                        </li>
+                    {% endif %}
+                    
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">Next</span>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

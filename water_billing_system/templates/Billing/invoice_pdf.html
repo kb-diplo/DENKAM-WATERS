@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Invoice {{ invoice.invoice_number }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .invoice-box {
+            max-width: 800px;
+            margin: auto;
+            padding: 30px;
+            border: 1px solid #eee;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+            font-size: 16px;
+            line-height: 24px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 20px;
+        }
+        .company-info {
+            text-align: left;
+        }
+        .invoice-info {
+            text-align: right;
+        }
+        table {
+            width: 100%;
+            line-height: inherit;
+            text-align: left;
+            border-collapse: collapse;
+        }
+        table td, table th {
+            padding: 8px;
+            vertical-align: top;
+        }
+        table th {
+            background: #eee;
+            font-weight: bold;
+        }
+        table.border td, table.border th {
+            border: 1px solid #ddd;
+        }
+        .text-right {
+            text-align: right;
+        }
+        .mt-4 {
+            margin-top: 1.5rem;
+        }
+        .total {
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-box">
+        <div class="header">
+            <div class="company-info">
+                <h2>Dekam Waters</h2>
+                <p>123 Water Street</p>
+                <p>Nairobi, Kenya</p>
+                <p>Phone: +254 700 123 456</p>
+                <p>Email: info@dekamwaters.com</p>
+            </div>
+            
+            <div class="invoice-info">
+                <h2>INVOICE</h2>
+                <p><strong>Invoice #:</strong> {{ invoice.invoice_number }}</p>
+                <p><strong>Date:</strong> {{ invoice.issued_date|date:"M d, Y" }}</p>
+                <p><strong>Billing Period:</strong> {{ invoice.bill.billing_period }}</p>
+                <p><strong>Due Date:</strong> {{ invoice.bill.due_date|date:"M d, Y" }}</p>
+            </div>
+        </div>
+        
+        <div class="customer-info mt-4">
+            <table>
+                <tr>
+                    <th>Bill To:</th>
+                    <td>{{ invoice.bill.customer.name }}</td>
+                </tr>
+                <tr>
+                    <th>Address:</th>
+                    <td>{{ invoice.bill.customer.address }}</td>
+                </tr>
+                <tr>
+                    <th>Contact:</th>
+                    <td>{{ invoice.bill.customer.contact }}</td>
+                </tr>
+                <tr>
+                    <th>Meter ID:</th>
+                    <td>{{ invoice.bill.customer.meter_id }}</td>
+                </tr>
+            </table>
+        </div>
+        
+        <div class="invoice-details mt-4">
+            <table class="border">
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th class="text-right">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Water Usage ({{ invoice.bill.usage }} units @ KES {{ invoice.bill.tariff.rate_per_unit }}/unit)</td>
+                        <td class="text-right">KES {{ invoice.bill.usage|floatformat:2 }}</td>
+                    </tr>
+                    <tr>
+                        <td>Fixed Charge</td>
+                        <td class="text-right">KES {{ invoice.bill.tariff.fixed_charge|floatformat:2 }}</td>
+                    </tr>
+                    <tr class="total">
+                        <td>Total Amount Due</td>
+                        <td class="text-right">KES {{ invoice.bill.amount_due|floatformat:2 }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="notes mt-4">
+            {% if invoice.notes %}
+                <p><strong>Notes:</strong> {{ invoice.notes }}</p>
+            {% endif %}
+            <p>Thank you for your business!</p>
+        </div>
+    </div>
+</body>
+</html>

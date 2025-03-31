@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Receipt {{ receipt.receipt_number }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .receipt-box {
+            max-width: 800px;
+            margin: auto;
+            padding: 30px;
+            border: 1px solid #eee;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+            font-size: 16px;
+            line-height: 24px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 20px;
+        }
+        .company-info {
+            text-align: left;
+        }
+        .receipt-info {
+            text-align: right;
+        }
+        table {
+            width: 100%;
+            line-height: inherit;
+            text-align: left;
+            border-collapse: collapse;
+        }
+        table td, table th {
+            padding: 8px;
+            vertical-align: top;
+        }
+        table th {
+            background: #eee;
+            font-weight: bold;
+        }
+        table.border td, table.border th {
+            border: 1px solid #ddd;
+        }
+        .text-right {
+            text-align: right;
+        }
+        .mt-4 {
+            margin-top: 1.5rem;
+        }
+        .total {
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="receipt-box">
+        <div class="header">
+            <div class="company-info">
+                <h2>Dekam Waters</h2>
+                <p>123 Water Street</p>
+                <p>Nairobi, Kenya</p>
+                <p>Phone: +254 700 123 456</p>
+                <p>Email: info@dekamwaters.com</p>
+            </div>
+            
+            <div class="receipt-info">
+                <h2>RECEIPT</h2>
+                <p><strong>Receipt #:</strong> {{ receipt.receipt_number }}</p>
+                <p><strong>Date:</strong> {{ receipt.issued_date|date:"M d, Y" }}</p>
+                <p><strong>Payment Date:</strong> {{ receipt.payment.payment_date|date:"M d, Y" }}</p>
+            </div>
+        </div>
+        
+        <div class="customer-info mt-4">
+            <table>
+                <tr>
+                    <th>Received From:</th>
+                    <td>{{ receipt.payment.customer.name }}</td>
+                </tr>
+                <tr>
+                    <th>Address:</th>
+                    <td>{{ receipt.payment.customer.address }}</td>
+                </tr>
+                <tr>
+                    <th>Contact:</th>
+                    <td>{{ receipt.payment.customer.contact }}</td>
+                </tr>
+                <tr>
+                    <th>Meter ID:</th>
+                    <td>{{ receipt.payment.customer.meter_id }}</td>
+                </tr>
+            </table>
+        </div>
+        
+        <div class="receipt-details mt-4">
+            <table class="border">
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th class="text-right">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Payment for Bill #{{ receipt.payment.bill.id }} ({{ receipt.payment.bill.billing_period }})</td>
+                        <td class="text-right">KES {{ receipt.payment.amount_paid|floatformat:2 }}</td>
+                    </tr>
+                    <tr class="total">
+                        <td>Total Amount Received</td>
+                        <td class="text-right">KES {{ receipt.payment.amount_paid|floatformat:2 }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="payment-info mt-4">
+            <table>
+                <tr>
+                    <th>Payment Method:</th>
+                    <td>{{ receipt.payment.get_payment_method_display }}</td>
+                </tr>
+                {% if receipt.payment.transaction_id %}
+                    <tr>
+                        <th>Transaction ID:</th>
+                        <td>{{ receipt.payment.transaction_id }}</td>
+                    </tr>
+                {% endif %}
+                <tr>
+                    <th>Received By:</th>
+                    <td>{{ receipt.payment.received_by.username }}</td>
+                </tr>
+            </table>
+        </div>
+        
+        <div class="notes mt-4">
+            {% if receipt.notes %}
+                <p><strong>Notes:</strong> {{ receipt.notes }}</p>
+            {% endif %}
+            <p>Thank you for your payment!</p>
+        </div>
+    </div>
+</body>
+</html>

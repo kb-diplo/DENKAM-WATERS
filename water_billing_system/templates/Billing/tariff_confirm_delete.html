@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Tariff{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h4>Confirm Delete</h4>
+            </div>
+            <div class="card-body">
+                <p>Are you sure you want to delete the "{{ object.name }}" tariff?</p>
+                <p><strong>Rate:</strong> KES {{ object.rate_per_unit }}/unit</p>
+                <p><strong>Fixed Charge:</strong> KES {{ object.fixed_charge }}</p>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mt-3">
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                        <a href="{% url 'billing:tariff_list' %}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

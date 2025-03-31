@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if form.instance.pk %}Edit{% else %}Create{% endif %} Payment{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4>{% if form.instance.pk %}Edit{% else %}Create{% endif %} Payment</h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <div class="mt-3">
+                        <button type="submit" class="btn btn-primary">Save</button>
+                        <a href="{% url 'payments:payment_list' %}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const customerField = document.getElementById('id_customer');
+    const billField = document.getElementById('id_bill');
+    
+    customerField.addEventListener('change', function() {
+        const customerId = this.value;
+        if (customerId) {
+            fetch(`/billing/api/customer-bills/?customer_id=${customerId}`)
+                .then(response => response.json())
+                .then(data => {
+                    billField.innerHTML = '';
+                    data.bills.forEach(bill => {
+                        const option = document.createElement('option');
+                        option.value = bill.id;
+                        option.textContent = `Bill #${bill.id} (${bill.billing_period}) - KES ${bill.amount_due}`;
+                        billField.appendChild(option);
+                    });
+                });
+        } else {
+            billField.innerHTML = '<option value="">---------</option>';
+        }
+    });
+});
+</script>
+{% endblock %}

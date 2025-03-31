@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block title %}Bill Details{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h4>Bill Details</h4>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-4">Customer:</dt>
+                    <dd class="col-sm-8">{{ bill.customer.name }}</dd>
+                    
+                    <dt class="col-sm-4">Billing Period:</dt>
+                    <dd class="col-sm-8">{{ bill.billing_period }}</dd>
+                    
+                    <dt class="col-sm-4">Start Date:</dt>
+                    <dd class="col-sm-8">{{ bill.start_date|date:"M d, Y" }}</dd>
+                    
+                    <dt class="col-sm-4">End Date:</dt>
+                    <dd class="col-sm-8">{{ bill.end_date|date:"M d, Y" }}</dd>
+                    
+                    <dt class="col-sm-4">Previous Reading:</dt>
+                    <dd class="col-sm-8">{{ bill.previous_reading }} units</dd>
+                    
+                    <dt class="col-sm-4">Current Reading:</dt>
+                    <dd class="col-sm-8">{{ bill.current_reading }} units</dd>
+                    
+                    <dt class="col-sm-4">Usage:</dt>
+                    <dd class="col-sm-8">{{ bill.usage }} units</dd>
+                    
+                    <dt class="col-sm-4">Tariff:</dt>
+                    <dd class="col-sm-8">{{ bill.tariff.name }} (KES {{ bill.tariff.rate_per_unit }}/unit)</dd>
+                    
+                    <dt class="col-sm-4">Fixed Charge:</dt>
+                    <dd class="col-sm-8">KES {{ bill.tariff.fixed_charge }}</dd>
+                    
+                    <dt class="col-sm-4">Amount Due:</dt>
+                    <dd class="col-sm-8">KES {{ bill.amount_due }}</dd>
+                    
+                    <dt class="col-sm-4">Status:</dt>
+                    <dd class="col-sm-8">
+                        <span class="badge bg-{% if bill.status == 'paid' %}success{% elif bill.status == 'overdue' %}danger{% else %}warning{% endif %}">
+                            {{ bill.get_status_display }}
+                        </span>
+                    </dd>
+                    
+                    <dt class="col-sm-4">Due Date:</dt>
+                    <dd class="col-sm-8">{{ bill.due_date|date:"M d, Y" }}</dd>
+                </dl>
+                
+                <div class="mt-3">
+                    <a href="{% url 'billing:bill_update' bill.pk %}" class="btn btn-warning">Edit</a>
+                    <a href="{% url 'billing:generate_invoice' bill.pk %}" class="btn btn-primary">Generate Invoice</a>
+                    <a href="{% url 'billing:bill_list' %}" class="btn btn-secondary">Back to List</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h4>Payment History</h4>
+            </div>
+            <div class="card-body">
+                {% if bill.payments.all %}
+                    <ul class="list-group">
+                        {% for payment in bill.payments.all %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                {{ payment.payment_date|date:"M d, Y" }}
+                                <span class="badge bg-success rounded-pill">
+                                    KES {{ payment.amount_paid }}
+                                </span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>No payments recorded for this bill.</p>
+                {% endif %}
+                
+                <div class="mt-3">
+                    <a href="{% url 'payments:payment_create' %}?bill={{ bill.id }}" class="btn btn-success">Record Payment</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

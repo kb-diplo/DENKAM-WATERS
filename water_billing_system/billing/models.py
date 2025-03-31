@@ -1,6 +1,7 @@
 from django.db import models
 from customers.models import Customer
 from meter_readings.models import MeterReading
+from django.utils import timezone
 
 class Tariff(models.Model):
     name = models.CharField(max_length=100)
@@ -27,12 +28,12 @@ class Bill(models.Model):
     start_date = models.DateField()
     end_date = models.DateField()
     previous_reading = models.DecimalField(max_digits=10, decimal_places=2)
-    current_reading = models.DecimalField(max_digits=10, decimal_places=2)
+    current_reading = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True, blank=True)
     usage = models.DecimalField(max_digits=10, decimal_places=2)
     tariff = models.ForeignKey(Tariff, on_delete=models.PROTECT)
     amount_due = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
-    due_date = models.DateField()
+    due_date = models.DateField(default=timezone.now, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     

@@ -2,6 +2,7 @@ from django.db import models
 from customers.models import Customer, Meter
 
 class MeterReading(models.Model):
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     meter = models.ForeignKey(Meter, on_delete=models.CASCADE, related_name='readings')
     reading_date = models.DateTimeField()
     reading_value = models.DecimalField(max_digits=10, decimal_places=2)

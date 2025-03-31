@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}Meter Reading Details{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h4>Meter Reading Details</h4>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-4">Customer:</dt>
+                    <dd class="col-sm-8">{{ object.meter.customer.name }}</dd>
+                    
+                    <dt class="col-sm-4">Meter ID:</dt>
+                    <dd class="col-sm-8">{{ object.meter.customer.meter_id }}</dd>
+                    
+                    <dt class="col-sm-4">Reading Date:</dt>
+                    <dd class="col-sm-8">{{ object.reading_date|date:"M d, Y H:i" }}</dd>
+                    
+                    <dt class="col-sm-4">Reading Value:</dt>
+                    <dd class="col-sm-8">{{ object.reading_value }} units</dd>
+                    
+                    <dt class="col-sm-4">Recorded By:</dt>
+                    <dd class="col-sm-8">{{ object.recorded_by.username }}</dd>
+                    
+                    {% if object.notes %}
+                        <dt class="col-sm-4">Notes:</dt>
+                        <dd class="col-sm-8">{{ object.notes }}</dd>
+                    {% endif %}
+                </dl>
+                
+                <div class="mt-3">
+                    <a href="{% url 'meter_readings:reading_update' object.pk %}" class="btn btn-warning">Edit</a>
+                    <a href="{% url 'meter_readings:reading_delete' object.pk %}" class="btn btn-danger">Delete</a>
+                    <a href="{% url 'meter_readings:reading_list' %}" class="btn btn-secondary">Back to List</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h4>Customer Information</h4>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-4">Name:</dt>
+                    <dd class="col-sm-8">{{ object.meter.customer.name }}</dd>
+                    
+                    <dt class="col-sm-4">Address:</dt>
+                    <dd class="col-sm-8">{{ object.meter.customer.address }}</dd>
+                    
+                    <dt class="col-sm-4">Contact:</dt>
+                    <dd class="col-sm-8">{{ object.meter.customer.contact }}</dd>
+                    
+                    <dt class="col-sm-4">Meter ID:</dt>
+                    <dd class="col-sm-8">{{ object.meter.customer.meter_id }}</dd>
+                </dl>
+                
+                <div class="mt-3">
+                    <a href="{% url 'customers:customer_detail' object.meter.customer.pk %}" class="btn btn-info">View Customer</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
