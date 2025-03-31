@@ -12,7 +12,7 @@ class Report(models.Model):
     report_type = models.CharField(max_length=20, choices=REPORT_TYPE_CHOICES)
     generated_by = models.ForeignKey(User, on_delete=models.CASCADE)
     start_date = models.DateField()
-    end_date = models.DateField()
+    end_date = models.DateField(auto_now_add=True)
     data = models.JSONField()
     created_at = models.DateTimeField(auto_now_add=True)
     
