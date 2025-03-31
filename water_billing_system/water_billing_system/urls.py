@@ -16,20 +16,20 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from customers.views import home  
-from meter_readings import views as meter_views
-from customers import views as customer_views
+from django.conf import settings
+from django.conf.urls.static import static
+from accounts.views import dashboard_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('accounts/', include('accounts.urls')),
-    path('meter-readings/', include('meter_readings.urls')),
-    path('customers/', include('customers.urls')),
-    path('', home, name='home'),  
-    path('', include('customers.urls')),
-    path('meter-readings/', include('meter_readings.urls')),
-    path('meter-readings/add/', meter_views.add_meter_reading, name='add_meter_reading'),
-    path('meter-readings/success/', meter_views.meter_reading_success, name='meter_reading_success'),
-    path('customers/', customer_views.customer_list, name='customer_list'),
-    path('customers/<int:pk>/', customer_views.customer_detail, name='customer_detail'),
+    path('', dashboard_view, name='dashboard'),
+    path('accounts/', include('accounts.urls', namespace='accounts')),
+    path('customers/', include('customers.urls', namespace='customers')),
+    path('meter-readings/', include('meter_readings.urls', namespace='meter_readings')),
+    path('billing/', include('billing.urls', namespace='billing')),
+    path('payments/', include('payments.urls', namespace='payments')),
+    path('reports/', include('reports.urls', namespace='reports')),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
