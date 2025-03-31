@@ -134,13 +134,31 @@ USE_I18N = True
 
 USE_TZ = True
 
+# Media files
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.1/howto/static-files/
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
 
-STATIC_URL = 'static/'
+# Login/Logout redirects
+LOGIN_REDIRECT_URL = 'dashboard'
+LOGOUT_REDIRECT_URL = 'accounts:login'
+
+# Email settings (for password reset, etc.)
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# PDF generation timeout
+PDF_GENERATION_TIMEOUT = 30
 
 # Default primary key field type
-# https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+
+
+
