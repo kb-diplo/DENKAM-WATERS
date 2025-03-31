@@ -1,27 +1,19 @@
 from django.urls import path
-from . import views
+from .views import (
+    CustomerListView, 
+    CustomerCreateView, 
+    CustomerDetailView,
+    CustomerUpdateView,
+    CustomerDeleteView
+)
+
+app_name = 'customers'
+
 
 urlpatterns = [
-    path('', views.home, name='home'),  
-    
-    # Home page for customers
-    path('', views.customer_dashboard, name='customer_dashboard'),
-
-    # Billing history
-    path('billing-history/', views.billing_history, name='billing_history'),
-
-    #Complete profile
-    path('complete-profile/', views.complete_profile, name='complete_profile'),
-
-    # Payment history
-    path('payment-history/', views.payment_history, name='payment_history'),
-
-    # Account management
-    path('account/', views.account_management, name='account_management'),
-
-    # Update account details
-    path('account/update/', views.update_account, name='update_account'),
-
-    # Water usage tracking
-    path('usage/', views.water_usage, name='water_usage'),
+    path('', CustomerListView.as_view(), name='customer_list'),
+    path('create/', CustomerCreateView.as_view(), name='customer_create'),
+    path('<int:pk>/', CustomerDetailView.as_view(), name='customer_detail'),
+    path('<int:pk>/update/', CustomerUpdateView.as_view(), name='customer_update'),
+    path('<int:pk>/delete/', CustomerDeleteView.as_view(), name='customer_delete'),
 ]
