@@ -1,63 +1,48 @@
-from django.shortcuts import render, redirect
+from django.urls import reverse_lazy
+from django.views.generic import (
+    ListView, 
+    CreateView, 
+    DetailView, 
+    UpdateView, 
+    DeleteView
+)
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from .models import MeterReading
 from .forms import MeterReadingForm
-from django.contrib.auth.decorators import login_required, user_passes_test
 
-from django.views.generic import CreateView, ListView
-from django.contrib.auth.decorators import login_required, user_passes_test
-from accounts.models import User
+class StaffRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
+    def test_func(self):
+        return self.request.user.role in ['supplier', 'admin', 'meter_reader']
 
-def is_supplier(user):
-    return user.is_authenticated and user.is_supplier
+class MeterReadingListView(StaffRequiredMixin, ListView):
+    model = MeterReading
+    template_name = 'meter_readings/reading_list.html'
+    context_object_name = 'readings'
+    paginate_by = 10
 
-@login_required
-@user_passes_test(is_supplier)
-def add_meter_reading(request):
-    if request.method == 'POST':
-        form = MeterReadingForm(request.POST)
-        if form.is_valid():
-            reading = form.save(commit=False)
-            reading.staff = request.user
-            reading.save()
-            return redirect('meter_reading_success')
-    else:
-        form = MeterReadingForm()
-    
-    return render(request, 'meter_readings/input.html', {'form': form})
-
-@login_required
-@user_passes_test(lambda u: u.role == 'supplier')
-def meter_reading_create(request):
-    if request.method == 'POST':
-        form = MeterReadingForm(request.POST)
-        if form.is_valid():
-            reading = form.save(commit=False)
-            reading.save()
-            return redirect('meter_reading_list')
-    else:
-        form = MeterReadingForm()
-    return render(request, 'meter_readings/create.html', {'form': form})
-
-@login_required
-def meter_reading_list(request):
-    if request.user.role == 'supplier':
-        readings = MeterReading.objects.all()
-    else:
-        customer = request.user.customer
-        readings = MeterReading.objects.filter(customer=customer)
-    return render(request, 'meter_readings/list.html', {'readings': readings})
-def meter_reading_success(request):
-    return render(request, 'meter_readings/success.html')
-
-
-class MeterReadingCreateView(CreateView):
+class MeterReadingCreateView(StaffRequiredMixin, CreateView):
     model = MeterReading
     form_class = MeterReadingForm
-    template_name = 'meter_readings/create.html'
-    success_url = '/meter-readings/'
+    template_name = 'meter_readings/reading_form.html'
+    success_url = reverse_lazy('meter_readings:reading_list')
+    
+    def form_valid(self, form):
+        form.instance.recorded_by = self.request.user
+        return super().form_valid(form)
 
-class MeterReadingListView(ListView):
+class MeterReadingDetailView(StaffRequiredMixin, DetailView):
     model = MeterReading
-    template_name = 'meter_readings/list.html'
-    context_object_name = 'readings'
-    paginate_by = 20
+    template_name = 'meter_readings/reading_detail.html'
+
+class MeterReadingUpdateView(StaffRequiredMixin, UpdateView):
+    model = MeterReading
+    form_class = MeterReadingForm
+    template_name = 'meter_readings/reading_form.html'
+    
+    def get_success_url(self):
+        return reverse_lazy('meter_readings:reading_detail', kwargs={'pk': self.object.pk})
+
+class MeterReadingDeleteView(StaffRequiredMixin, DeleteView):
+    model = MeterReading
+    template_name = 'meter_readings/reading_confirm_delete.html'
+    success_url = reverse_lazy('meter_readings:reading_list')

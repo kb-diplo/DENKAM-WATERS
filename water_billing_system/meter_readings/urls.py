@@ -1,7 +1,18 @@
 from django.urls import path
-from . import views
+from .views import (
+    MeterReadingListView, 
+    MeterReadingCreateView, 
+    MeterReadingDetailView,
+    MeterReadingUpdateView,
+    MeterReadingDeleteView
+)
+
+app_name = 'meter_readings'
 
 urlpatterns = [
-    path('input/', views.add_meter_reading, name='add_meter_reading'),
-    path('success/', views.meter_reading_success, name='meter_reading_success'),
- ]
+    path('', MeterReadingListView.as_view(), name='reading_list'),
+    path('create/', MeterReadingCreateView.as_view(), name='reading_create'),
+    path('<int:pk>/', MeterReadingDetailView.as_view(), name='reading_detail'),
+    path('<int:pk>/update/', MeterReadingUpdateView.as_view(), name='reading_update'),
+    path('<int:pk>/delete/', MeterReadingDeleteView.as_view(), name='reading_delete'),
+]
