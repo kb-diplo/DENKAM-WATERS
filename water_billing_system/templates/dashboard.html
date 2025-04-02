@@ -43,29 +43,39 @@
                     </div>
                 </div>
             </div>
-        {% endif %}
-        
-        {% if user.role == 'customer' %}
+        {% elif user.role == 'customer' %}
             <div class="row mt-4">
                 <div class="col-md-6">
                     <div class="card">
                         <div class="card-header">
-                            <h5>Your Recent Bills</h5>
+                            <h5>Recent Bills</h5>
                         </div>
                         <div class="card-body">
                             {% if recent_bills %}
-                                <ul class="list-group">
-                                    {% for bill in recent_bills %}
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            {{ bill.billing_period }}
-                                            <span class="badge bg-{% if bill.status == 'paid' %}success{% else %}warning{% endif %} rounded-pill">
-                                                KES {{ bill.amount_due }}
-                                            </span>
-                                        </li>
-                                    {% endfor %}
-                                </ul>
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Period</th>
+                                            <th>Amount</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for bill in recent_bills %}
+                                            <tr>
+                                                <td>{{ bill.billing_period|date:"F Y" }}</td>
+                                                <td>KES {{ bill.amount|floatformat:2 }}</td>
+                                                <td>
+                                                    <span class="badge {% if bill.status == 'paid' %}bg-success{% elif bill.status == 'pending' %}bg-warning{% else %}bg-danger{% endif %}">
+                                                        {{ bill.get_status_display }}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
                             {% else %}
-                                <p>No bills found.</p>
+                                <p>No recent bills found.</p>
                             {% endif %}
                         </div>
                     </div>
@@ -73,22 +83,30 @@
                 <div class="col-md-6">
                     <div class="card">
                         <div class="card-header">
-                            <h5>Your Recent Payments</h5>
+                            <h5>Recent Payments</h5>
                         </div>
                         <div class="card-body">
                             {% if recent_payments %}
-                                <ul class="list-group">
-                                    {% for payment in recent_payments %}
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            {{ payment.payment_date|date:"M d, Y" }}
-                                            <span class="badge bg-success rounded-pill">
-                                                KES {{ payment.amount_paid }}
-                                            </span>
-                                        </li>
-                                    {% endfor %}
-                                </ul>
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Amount</th>
+                                            <th>Reference</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for payment in recent_payments %}
+                                            <tr>
+                                                <td>{{ payment.payment_date|date:"d M Y" }}</td>
+                                                <td>KES {{ payment.amount|floatformat:2 }}</td>
+                                                <td>{{ payment.reference_number }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
                             {% else %}
-                                <p>No payments found.</p>
+                                <p>No recent payments found.</p>
                             {% endif %}
                         </div>
                     </div>
