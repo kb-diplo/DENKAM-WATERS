@@ -37,7 +37,7 @@ A comprehensive water billing system with manual meter reading and customer port
 1. Clone the repository:
    ```bash
    git clone https://github.com/kb-diplo/DENKAM-WATERS.git
-   cd water_billing_system
+   cd denkam-waters/water_billing_system
    ```
 
 2. Create and activate virtual environment:
@@ -51,27 +51,21 @@ A comprehensive water billing system with manual meter reading and customer port
    pip install -r requirements.txt
    ```
 
-4. Set up environment variables:
-   ```bash
-   copy .env.example .env
-   ```
 
-5. Run migrations:
+4. Run migrations:
    ```bash
+   python manage.py makemigrations
+   ```
+    ```bash
    python manage.py migrate
    ```
 
-6. Create admin user:
+5. Create admin user:
    ```bash
    python manage.py createsuperuser
    ```
 
-7. Load initial data (optional):
-   ```bash
-   python manage.py load_initial_data
-   ```
-
-8. Run development server:
+6. Run development server:
    ```bash
    python manage.py runserver
    ```
