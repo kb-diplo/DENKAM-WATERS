@@ -4,13 +4,9 @@ from . import views
 app_name = 'reports'
 
 urlpatterns = [
-    path('', views.report_list, name='report_list'),
-    path('billing/', views.billing_report, name='billing_report'),
-    path('billing/pdf/', views.billing_report_pdf, name='billing_report_pdf'),
-    path('payments/', views.payments_report, name='payments_report'),
-    path('payments/pdf/', views.payments_report_pdf, name='payments_report_pdf'),
-    path('consumption/', views.consumption_report, name='consumption_report'),
-    path('consumption/pdf/', views.consumption_report_pdf, name='consumption_report_pdf'),
-    path('customers/', views.customers_report, name='customers_report'),
-    path('customers/pdf/', views.customers_report_pdf, name='customers_report_pdf'),
+    path('', views.ReportListView.as_view(), name='report_list'),
+    path('sales/', views.SalesReportView.as_view(), name='sales_report'),
+    path('payments/', views.PaymentsReportView.as_view(), name='payments_report'),
+    path('balances/', views.BalancesReportView.as_view(), name='balances_report'),
+    path('report/<int:pk>/pdf/', views.generate_report_pdf, name='report_pdf'),
 ]
