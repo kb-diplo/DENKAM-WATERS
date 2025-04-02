@@ -11,9 +11,10 @@ from billing.models import Bill
 from payments.models import Payment
 from meter_readings.models import MeterReading
 from django.db import models
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
 from django.db.models import Sum, Count
 from django.conf import settings
+from django.contrib import messages
 
 logger = logging.getLogger(__name__)
 
@@ -44,20 +45,31 @@ def dashboard(request):
         context = {}
         user = request.user
 
+        if not hasattr(user, 'role'):
+            messages.error(request, "User profile is not properly configured.")
+            return redirect('accounts:profile')
+
         if user.role in ['admin', 'supplier']:
             # Admin/Supplier Dashboard Data
+            today = timezone.now()
+            month_start = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+
             context.update({
                 'customer_count': Customer.objects.count(),
                 'paid_bills_count': Bill.objects.filter(status='paid').count(),
                 'pending_bills_count': Bill.objects.filter(status='pending').count(),
                 'overdue_bills_count': Bill.objects.filter(status='overdue').count(),
-                'recent_readings': MeterReading.objects.select_related('customer', 'meter').order_by('-reading_date')[:5],
-                'recent_payments': Payment.objects.select_related('customer').order_by('-payment_date')[:5],
-                'total_revenue': Payment.objects.aggregate(total=Sum('amount'))['total'] or 0,
+                'recent_readings': MeterReading.objects.select_related('customer', 'meter')
+                                    .order_by('-reading_date')[:5],
+                'recent_payments': Payment.objects.select_related('customer')
+                                    .order_by('-payment_date')[:5],
                 'monthly_revenue': Payment.objects.filter(
-                    payment_date__month=timezone.now().month,
-                    payment_date__year=timezone.now().year
+                    payment_date__gte=month_start
                 ).aggregate(total=Sum('amount'))['total'] or 0,
+                'total_customers': Customer.objects.count(),
+                'active_meters': MeterReading.objects.filter(
+                    reading_date__gte=month_start
+                ).values('meter').distinct().count(),
             })
 
         elif user.role == 'meter_reader':
@@ -70,53 +82,91 @@ def dashboard(request):
                 ).select_related('customer', 'meter').order_by('reading_date'),
                 'completed_readings': MeterReading.objects.filter(
                     reader=user,
-                    reading_date__date=today
+                    reading_date__date=today,
+                    status='completed'
                 ).count(),
-                'total_readings': MeterReading.objects.filter(
+                'pending_readings': MeterReading.objects.filter(
+                    reader=user,
+                    reading_date__date=today,
+                    status='pending'
+                ).count(),
+                'total_assigned': MeterReading.objects.filter(
                     reader=user,
                     reading_date__date=today
                 ).count(),
             })
 
         elif user.role == 'customer':
-            # Customer Dashboard Data
-            customer = user.customer
-            current_month_start = timezone.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-            
-            # Get current month's usage
-            latest_reading = MeterReading.objects.filter(
-                customer=customer,
-                reading_date__gte=current_month_start
-            ).order_by('-reading_date').first()
-
-            previous_reading = MeterReading.objects.filter(
-                customer=customer,
-                reading_date__lt=current_month_start
-            ).order_by('-reading_date').first()
-
-            current_month_usage = 0
-            if latest_reading and previous_reading:
-                current_month_usage = latest_reading.reading_value - previous_reading.reading_value
-
-            context.update({
-                'current_month_usage': current_month_usage,
-                'outstanding_balance': Bill.objects.filter(
+            try:
+                # Customer Dashboard Data
+                customer = Customer.objects.get(user=user)
+                current_month_start = timezone.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+                
+                # Get current month's usage
+                latest_reading = MeterReading.objects.filter(
                     customer=customer,
-                    status__in=['pending', 'overdue']
-                ).aggregate(total=Sum('amount'))['total'] or 0,
-                'last_payment': Payment.objects.filter(customer=customer).order_by('-payment_date').first(),
-                'recent_bills': Bill.objects.filter(customer=customer).order_by('-billing_period')[:5],
-                'recent_payments': Payment.objects.filter(customer=customer).order_by('-payment_date')[:5],
-                'meter': customer.meter_set.first(),
-            })
+                    reading_date__gte=current_month_start
+                ).order_by('-reading_date').first()
+
+                previous_reading = MeterReading.objects.filter(
+                    customer=customer,
+                    reading_date__lt=current_month_start
+                ).order_by('-reading_date').first()
+
+                current_month_usage = 0
+                if latest_reading and previous_reading:
+                    current_month_usage = latest_reading.reading_value - previous_reading.reading_value
+
+                context.update({
+                    'customer': customer,
+                    'current_month_usage': current_month_usage,
+                    'outstanding_balance': Bill.objects.filter(
+                        customer=customer,
+                        status__in=['pending', 'overdue']
+                    ).aggregate(total=Sum('amount'))['total'] or 0,
+                    'last_payment': Payment.objects.filter(
+                        customer=customer
+                    ).order_by('-payment_date').first(),
+                    'recent_bills': Bill.objects.filter(
+                        customer=customer
+                    ).order_by('-billing_period')[:5],
+                    'recent_payments': Payment.objects.filter(
+                        customer=customer
+                    ).order_by('-payment_date')[:5],
+                    'meter': customer.meter_set.first(),
+                    'payment_history': Payment.objects.filter(
+                        customer=customer
+                    ).order_by('-payment_date')[:12],  # Last 12 payments
+                })
+
+            except Customer.DoesNotExist:
+                messages.error(request, "Customer profile not found. Please contact support.")
+                return redirect('accounts:profile')
 
         return render(request, 'dashboard.html', context)
 
     except Exception as e:
-        # Log the error
-        logger.error(f"Dashboard error for user {user.username}: {str(e)}")
-        # Return a user-friendly error page
+        logger.error(f"Dashboard error for user {request.user.username}: {str(e)}")
+        messages.error(request, "An error occurred while loading the dashboard. Please try again later.")
         return render(request, 'error.html', {
             'error_message': 'We encountered an error while loading your dashboard. Please try again later.',
             'error_details': str(e) if settings.DEBUG else None
-        }, status=500)
+        })
+
+def custom_error_view(request, exception=None):
+    return render(request, 'error.html', {
+        'error_message': 'An unexpected error occurred. Our team has been notified.',
+        'error_details': str(exception) if settings.DEBUG else None
+    }, status=500)
+
+def custom_permission_denied_view(request, exception=None):
+    return render(request, 'error.html', {
+        'error_message': 'You do not have permission to access this page.',
+        'error_details': str(exception) if settings.DEBUG else None
+    }, status=403)
+
+def custom_page_not_found_view(request, exception=None):
+    return render(request, 'error.html', {
+        'error_message': 'The page you are looking for could not be found.',
+        'error_details': str(exception) if settings.DEBUG else None
+    }, status=404)

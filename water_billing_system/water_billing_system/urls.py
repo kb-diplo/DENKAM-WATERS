@@ -19,12 +19,21 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from water_billing_system.views import custom_permission_denied_view, custom_page_not_found_view, custom_error_view
+from rest_framework.documentation import include_docs_urls
+from rest_framework.schemas import get_schema_view
 from . import views
 
 # Customize admin site
 admin.site.site_header = 'Denkam Waters Administration'
 admin.site.site_title = 'Denkam Waters Admin Portal'
 admin.site.index_title = 'Welcome to Denkam Waters Management Portal'
+
+# API Documentation
+schema_view = get_schema_view(
+    title='Denkam Waters API',
+    description='API for Denkam Waters Billing System',
+    version='1.0.0'
+)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -34,6 +43,14 @@ urlpatterns = [
     path('billing/', include('billing.urls', namespace='billing')),
     path('payments/', include('payments.urls', namespace='payments')),
     path('meter_readings/', include('meter_readings.urls', namespace='meter_readings')),
+    
+    # API URLs
+    path('api/customers/', include('customers.api.urls')),
+    path('api/billing/', include('billing.api.urls')),
+    path('api/payments/', include('payments.api.urls')),
+    path('api/meter_readings/', include('meter_readings.api.urls')),
+    path('api/docs/', include_docs_urls(title='Denkam Waters API Documentation')),
+    path('api/schema/', schema_view),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:

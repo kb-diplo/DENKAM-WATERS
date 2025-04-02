@@ -15,10 +15,10 @@
 
     {% if user.role == 'admin' or user.role == 'supplier' %}
     <!-- Admin/Supplier Dashboard -->
-    <div class="row">
+<div class="row">
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-primary shadow h-100 py-2">
-                <div class="card-body">
+                        <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Customers</div>
@@ -34,7 +34,7 @@
 
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-success shadow h-100 py-2">
-                <div class="card-body">
+                        <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Paid Bills</div>
@@ -50,7 +50,7 @@
 
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-warning shadow h-100 py-2">
-                <div class="card-body">
+                        <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Pending Bills</div>
@@ -66,7 +66,7 @@
 
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-danger shadow h-100 py-2">
-                <div class="card-body">
+                        <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Overdue Bills</div>
@@ -115,7 +115,7 @@
                     </div>
                     {% else %}
                     <p class="text-center text-muted my-5">No recent meter readings found.</p>
-                    {% endif %}
+        {% endif %}
                 </div>
             </div>
         </div>
@@ -155,8 +155,8 @@
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                     <h6 class="m-0 font-weight-bold text-primary">Today's Reading Schedule</h6>
                     <a href="{% url 'meter_readings:reading_list' %}" class="btn btn-sm btn-primary">View All Readings</a>
-                </div>
-                <div class="card-body">
+                        </div>
+                        <div class="card-body">
                     {% if scheduled_readings %}
                     <div class="table-responsive">
                         <table class="table">
@@ -180,13 +180,13 @@
                                         <a href="{% url 'meter_readings:reading_create' reading.meter.id %}" class="btn btn-sm btn-primary">Record Reading</a>
                                     </td>
                                 </tr>
-                                {% endfor %}
+                                    {% endfor %}
                             </tbody>
                         </table>
                     </div>
-                    {% else %}
+                            {% else %}
                     <p class="text-center text-muted my-5">No readings scheduled for today.</p>
-                    {% endif %}
+                            {% endif %}
                 </div>
             </div>
         </div>
@@ -232,7 +232,7 @@
         <!-- Last Payment Card -->
         <div class="col-xl-4 col-md-6 mb-4">
             <div class="card border-left-success shadow h-100 py-2">
-                <div class="card-body">
+                        <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Last Payment</div>
@@ -240,9 +240,9 @@
                                 {% if last_payment %}
                                 KES {{ last_payment.amount|floatformat:2 }}
                                 <small class="d-block text-muted">{{ last_payment.payment_date|date:"d M Y" }}</small>
-                                {% else %}
+                            {% else %}
                                 No payments yet
-                                {% endif %}
+                            {% endif %}
                             </div>
                         </div>
                         <div class="col-auto">
@@ -331,7 +331,7 @@
                     </div>
                     {% else %}
                     <p class="text-center text-muted my-5">No payment history found.</p>
-                    {% endif %}
+        {% endif %}
                 </div>
             </div>
         </div>
