@@ -18,12 +18,11 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from accounts.views import dashboard_view
+from water_billing_system.views import custom_permission_denied_view, custom_page_not_found_view, custom_error_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', dashboard_view, name='dashboard'),
-    path('accounts/', include('accounts.urls', namespace='accounts')),
+    path('', include('accounts.urls', namespace='accounts')),  # This will handle the root URL through accounts.urls
     path('customers/', include('customers.urls', namespace='customers')),
     path('meter-readings/', include('meter_readings.urls', namespace='meter_readings')),
     path('billing/', include('billing.urls', namespace='billing')),
@@ -31,6 +30,11 @@ urlpatterns = [
     path('reports/', include('reports.urls', namespace='reports')),
     path('api/', include('api.urls')),
 ]
+
+# Add error handler URLs
+handler403 = custom_permission_denied_view
+handler404 = custom_page_not_found_view
+handler500 = custom_error_view
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
