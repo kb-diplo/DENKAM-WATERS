@@ -1,4 +1,9 @@
 from rest_framework import viewsets, permissions
+from rest_framework.authtoken.views import obtain_auth_token
+from rest_framework.authtoken.models import Token
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+from django.utils import timezone
 from accounts.models import User
 from customers.models import Customer, Meter
 from meter_readings.models import MeterReading
@@ -49,3 +54,23 @@ class ReceiptViewSet(viewsets.ModelViewSet):
     queryset = Receipt.objects.all()
     serializer_class = ReceiptSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def refresh_auth_token(request):
+    """
+    Refresh the user's authentication token
+    """
+    try:
+        token = Token.objects.get(user=request.user)
+        token.delete()
+        token = Token.objects.create(user=request.user)
+        return Response({
+            'token': token.key,
+            'created': token.created,
+            'user_id': token.user_id
+        })
+    except Token.DoesNotExist:
+        return Response({
+            'error': 'No token found for user'
+        }, status=404)
