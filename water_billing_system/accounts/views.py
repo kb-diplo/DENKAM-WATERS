@@ -4,8 +4,11 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.views.generic import CreateView
 from django.urls import reverse_lazy
+from django.utils import timezone
+from datetime import datetime
 from .forms import CustomUserCreationForm
 from .models import UserProfile
+from meter_readings.models import MeterReading
 
 def login_view(request):
     if request.method == 'POST':
@@ -40,12 +43,43 @@ class RegisterView(CreateView):
 @login_required
 def profile_view(request):
     profile, created = UserProfile.objects.get_or_create(user=request.user)
+    context = {'profile': profile}
     
     if request.method == 'POST':
-        # Handle profile updates here
-        pass
+        # Handle profile updates
+        user = request.user
+        user.first_name = request.POST.get('first_name', '')
+        user.last_name = request.POST.get('last_name', '')
+        user.email = request.POST.get('email', '')
+        user.phone = request.POST.get('phone', '')
+        user.address = request.POST.get('address', '')
+        user.save()
+        
+        messages.success(request, 'Profile updated successfully!')
+        return redirect('accounts:profile')
     
-    return render(request, 'accounts/profile.html', {'profile': profile})
+    # Add current month usage for customers
+    if request.user.role == 'customer' and hasattr(request.user, 'customer_profile'):
+        current_month = timezone.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        try:
+            latest_reading = MeterReading.objects.filter(
+                customer=request.user.customer_profile,
+                reading_date__gte=current_month
+            ).latest('reading_date')
+            context['current_month_usage'] = latest_reading.reading_value
+        except MeterReading.DoesNotExist:
+            context['current_month_usage'] = 0
+    
+    return render(request, 'accounts/profile.html', context)
+
+@login_required
+def update_profile_picture(request):
+    if request.method == 'POST' and request.FILES.get('profile_picture'):
+        profile = request.user.profile
+        profile.profile_picture = request.FILES['profile_picture']
+        profile.save()
+        messages.success(request, 'Profile picture updated successfully!')
+    return redirect('accounts:profile')
 
 @login_required
 def dashboard_view(request):

@@ -4,7 +4,8 @@ from .views import (
     logout_view, 
     RegisterView, 
     profile_view, 
-    dashboard_view
+    dashboard_view,
+    update_profile_picture
 )
 
 app_name = 'accounts'
@@ -15,4 +16,5 @@ urlpatterns = [
     path('logout/', logout_view, name='logout'),
     path('register/', RegisterView.as_view(), name='register'),
     path('profile/', profile_view, name='profile'),
+    path('profile/update-picture/', update_profile_picture, name='update_profile_picture'),
 ]
