@@ -11,28 +11,40 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
-            <a class="navbar-brand" href="{% url 'admin:index' %}">Denkam Waters</a>
+            <a class="navbar-brand" href="{% url 'accounts:dashboard' %}">Denkam Waters</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     {% if user.is_authenticated %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'billing:bill_list' %}">Bills</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'customers:customer_list' %}">Customers</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'meter_readings:reading_list' %}">Meter Readings</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'payments:payment_list' %}">Payments</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'reports:report_list' %}">Reports</a>
-                        </li>
+                        {% if user.role in 'supplier,admin' %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'customers:customer_list' %}">Customers</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'meter_readings:reading_list' %}">Meter Readings</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'billing:bill_list' %}">Bills</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'payments:payment_list' %}">Payments</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'reports:report_list' %}">Reports</a>
+                            </li>
+                        {% else %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'billing:bill_list' %}">My Bills</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'meter_readings:reading_list' %}">My Readings</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'payments:payment_list' %}">My Payments</a>
+                            </li>
+                        {% endif %}
                     {% endif %}
                 </ul>
                 <ul class="navbar-nav">
@@ -43,6 +55,9 @@
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
                                 <li><a class="dropdown-item" href="{% url 'accounts:profile' %}">Profile</a></li>
+                                {% if user.is_staff %}
+                                    <li><a class="dropdown-item" href="{% url 'admin:index' %}">Admin</a></li>
+                                {% endif %}
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="{% url 'accounts:logout' %}">Logout</a></li>
                             </ul>
