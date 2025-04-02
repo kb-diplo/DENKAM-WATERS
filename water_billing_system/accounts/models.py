@@ -3,7 +3,6 @@ from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from customers.models import Customer
 
 class User(AbstractUser):
     ROLE_CHOICES = (
@@ -34,6 +33,8 @@ def create_user_profile(sender, instance, created, **kwargs):
     if created:
         UserProfile.objects.create(user=instance)
         if instance.role == 'customer':
+            # Import here to avoid circular import
+            from customers.models import Customer
             Customer.objects.create(
                 user=instance,
                 name=f"{instance.first_name} {instance.last_name}".strip() or instance.username,
