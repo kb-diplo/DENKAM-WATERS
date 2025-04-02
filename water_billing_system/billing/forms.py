@@ -90,9 +90,31 @@ class TariffForm(forms.ModelForm):
         }
 
 class InvoiceForm(forms.ModelForm):
+    bill = forms.ModelChoiceField(
+        queryset=Bill.objects.filter(status='pending'),
+        empty_label="Select a bill",
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    
+    due_date = forms.DateField(
+        widget=forms.DateInput(attrs={
+            'type': 'date',
+            'class': 'form-control'
+        })
+    )
+    
+    notes = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'rows': 3,
+            'placeholder': 'Add any additional notes here...'
+        })
+    )
+
     class Meta:
         model = Invoice
-        fields = ['bill', 'invoice_number', 'due_date', 'notes']
+        fields = ['bill', 'due_date', 'notes']
         widgets = {
             'due_date': forms.DateInput(attrs={'type': 'date'}),
             'notes': forms.Textarea(attrs={'rows': 3}),
