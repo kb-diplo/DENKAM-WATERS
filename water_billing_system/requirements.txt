@@ -1,48 +1,25 @@
-arabic-reshaper==3.0.0
-asgiref==3.8.1
-asn1crypto==1.5.1
-certifi==2025.1.31
-cffi==1.17.1
-chardet==5.2.0
-charset-normalizer==3.4.1
-click==8.1.8
-colorama==0.4.6
-crispy-bootstrap5>=2023.10
-cryptography==44.0.2
-cssselect2==0.8.0
-defusedxml==0.7.1
+# Core Django Framework
 Django>=5.1.6
-django-crispy-forms>=2.1
-django-tables2==2.7.0
-djangorestframework>=3.14.0
-html5lib==1.1
-idna==3.10
-lxml==5.3.1
-oscrypto==1.3.0
-pillow>=10.0.0
-pycparser==2.22
-pyHanko==0.26.0
-pyhanko-certvalidator==0.26.8
-pypdf==5.4.0
-python-bidi==0.6.6
-python-dotenv>=1.0.0
-PyYAML==6.0.2
-qrcode==8.0
-reportlab==4.3.1
-requests==2.32.3
-setuptools==78.1.0
-six==1.17.0
-sqlparse==0.5.3
-svglib==1.5.1
-tinycss2==1.4.0
-tzdata==2025.2
-tzlocal==5.3.1
-uritools==4.0.3
-urllib3==2.3.0
-webencodings==0.5.1
-wheel==0.45.1
-xhtml2pdf>=0.2.11
-django-filter>=23.5
+
+# Form Styling and UI Components
+django-crispy-forms>=2.1  # For better form rendering
+crispy-bootstrap5>=2023.10  # Bootstrap 5 template pack for crispy-forms
+django-tables2==2.7.0  # For rendering data tables
+
+# API and Documentation
+djangorestframework>=3.14.0  # For REST API functionality
+django-cors-headers>=4.3.1  # For handling CORS in API requests
+django-filter>=23.5  # For filtering querysets in views
 coreapi>=2.3.3  # For API documentation
 markdown>=3.5.1  # For API documentation
-django-cors-headers>=4.3.1
+
+# PDF Generation
+xhtml2pdf>=0.2.11  # For generating PDFs from HTML templates
+reportlab==4.3.1  # Required by xhtml2pdf for PDF generation
+pypdf==5.4.0  # Required by xhtml2pdf for PDF manipulation
+
+# Image Processing
+pillow>=10.0.0  
+
+# Environment and Configuration
+python-dotenv>=1.0.0  # loading environment variables from .env file

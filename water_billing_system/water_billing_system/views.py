@@ -161,21 +161,3 @@ def dashboard(request):
             'error_message': 'We encountered an error while loading your dashboard. Please try again later.',
             'error_details': str(e) if settings.DEBUG else None
         })
-
-def custom_error_view(request, exception=None):
-    return render(request, 'error.html', {
-        'error_message': 'An unexpected error occurred. Our team has been notified.',
-        'error_details': str(exception) if settings.DEBUG else None
-    }, status=500)
-
-def custom_permission_denied_view(request, exception=None):
-    return render(request, 'error.html', {
-        'error_message': 'You do not have permission to access this page.',
-        'error_details': str(exception) if settings.DEBUG else None
-    }, status=403)
-
-def custom_page_not_found_view(request, exception=None):
-    return render(request, 'error.html', {
-        'error_message': 'The page you are looking for could not be found.',
-        'error_details': str(exception) if settings.DEBUG else None
-    }, status=404)
