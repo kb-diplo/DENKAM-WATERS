@@ -101,4 +101,4 @@ def dashboard_view(request):
         context['recent_bills'] = Bill.objects.filter(customer=customer).order_by('-billing_period')[:5]
         context['recent_payments'] = Payment.objects.filter(customer=customer).order_by('-payment_date')[:5]
     
-    return render(request, 'dashboard.html', context)
+    return render(request, 'accounts/dashboard.html', context)
