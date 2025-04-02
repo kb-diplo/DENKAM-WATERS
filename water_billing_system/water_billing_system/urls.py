@@ -18,45 +18,27 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from water_billing_system.views import custom_permission_denied_view, custom_page_not_found_view, custom_error_view
-from rest_framework.documentation import include_docs_urls
-from rest_framework.schemas import get_schema_view
-from . import views
+from django.views.generic import RedirectView
+from .admin import admin_site
 
 # Customize admin site
 admin.site.site_header = 'Denkam Waters Administration'
 admin.site.site_title = 'Denkam Waters Admin Portal'
 admin.site.index_title = 'Welcome to Denkam Waters Management Portal'
 
-# API Documentation
-schema_view = get_schema_view(
-    title='Denkam Waters API',
-    description='API for Denkam Waters Billing System',
-    version='1.0.0'
-)
-
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', views.dashboard, name='dashboard'),
-    path('accounts/', include('accounts.urls', namespace='accounts')),
-    path('customers/', include('customers.urls', namespace='customers')),
-    path('billing/', include('billing.urls', namespace='billing')),
-    path('payments/', include('payments.urls', namespace='payments')),
-    path('meter_readings/', include('meter_readings.urls', namespace='meter_readings')),
-    
-    # API URLs
-    path('api/customers/', include('customers.api.urls')),
-    path('api/billing/', include('billing.api.urls')),
-    path('api/payments/', include('payments.api.urls')),
-    path('api/meter_readings/', include('meter_readings.api.urls')),
-    path('api/docs/', include_docs_urls(title='Denkam Waters API Documentation')),
-    path('api/schema/', schema_view),
+    path('admin/', admin_site.urls),
+    path('', RedirectView.as_view(url='admin/', permanent=False)),
+    path('customers/', include('customers.urls')),
+    path('meter_readings/', include('meter_readings.urls')),
+    path('bills/', include('billing.urls')),
+    path('payments/', include('payments.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 # Custom error handlers
-handler403 = custom_permission_denied_view
-handler404 = custom_page_not_found_view
-handler500 = custom_error_view
+handler403 = 'water_billing_system.views.custom_permission_denied_view'
+handler404 = 'water_billing_system.views.custom_page_not_found_view'
+handler500 = 'water_billing_system.views.custom_error_view'

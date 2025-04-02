@@ -1,7 +1,9 @@
 from django.db import models
+from django.core.validators import MinValueValidator
 from customers.models import Customer
 from meter_readings.models import MeterReading
 from django.utils import timezone
+import uuid
 
 class Tariff(models.Model):
     name = models.CharField(max_length=100)
@@ -16,40 +18,55 @@ class Tariff(models.Model):
         return f"{self.name} @ KES {self.rate_per_unit}/unit"
 
 class Bill(models.Model):
-    STATUS_CHOICES = (
+    STATUS_CHOICES = [
         ('pending', 'Pending'),
         ('paid', 'Paid'),
         ('overdue', 'Overdue'),
-        ('cancelled', 'Cancelled'),
-    )
+    ]
     
+    bill_number = models.CharField(max_length=20, unique=True, editable=False)
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='bills')
-    billing_period = models.CharField(max_length=50)
-    start_date = models.DateField()
-    end_date = models.DateField()
-    previous_reading = models.DecimalField(max_digits=10, decimal_places=2)
-    current_reading = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True, blank=True)
-    usage = models.DecimalField(max_digits=10, decimal_places=2)
-    tariff = models.ForeignKey(Tariff, on_delete=models.PROTECT)
-    amount_due = models.DecimalField(max_digits=10, decimal_places=2)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
-    due_date = models.DateField(default=timezone.now, null=True, blank=True)
+    billing_period = models.DateField()
+    previous_reading = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
+    current_reading = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
+    rate_per_unit = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
-        ordering = ['-billing_period']
+        ordering = ['-billing_period', '-created_at']
+        
+    def save(self, *args, **kwargs):
+        if not self.bill_number:
+            self.bill_number = self.generate_bill_number()
+        super().save(*args, **kwargs)
+    
+    def generate_bill_number(self):
+        year = timezone.now().year
+        month = timezone.now().month
+        unique_id = str(uuid.uuid4().hex)[:6]
+        return f'BILL-{year}{month:02d}-{unique_id}'
+    
+    @property
+    def units_consumed(self):
+        return max(0, self.current_reading - self.previous_reading)
+    
+    @property
+    def total_amount(self):
+        return self.units_consumed * self.rate_per_unit
+    
+    @property
+    def vat_amount(self):
+        return self.total_amount * 0.16  # 16% VAT
+    
+    @property
+    def total_with_vat(self):
+        return self.total_amount + self.vat_amount
     
     def __str__(self):
-        return f"Bill #{self.id} for {self.customer.name} - {self.billing_period}"
-    
-    def save(self, *args, **kwargs):
-        # Calculate usage and amount due if not set
-        if not self.usage:
-            self.usage = self.current_reading - self.previous_reading
-        if not self.amount_due:
-            self.amount_due = (self.usage * self.tariff.rate_per_unit) + self.tariff.fixed_charge
-        super().save(*args, **kwargs)
+        return f"Bill {self.bill_number} - {self.customer.full_name} ({self.billing_period})"
 
 class Invoice(models.Model):
     bill = models.OneToOneField(Bill, on_delete=models.CASCADE, related_name='invoice')

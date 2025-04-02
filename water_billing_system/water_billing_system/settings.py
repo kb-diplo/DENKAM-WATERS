@@ -187,6 +187,12 @@ os.makedirs(STATIC_ROOT, exist_ok=True)
 os.makedirs(os.path.join(BASE_DIR, 'static'), exist_ok=True)
 os.makedirs(MEDIA_ROOT, exist_ok=True)
 
+# Ensure admin static files are included
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+]
+
 # Login/Logout redirects
 LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'accounts:login'
