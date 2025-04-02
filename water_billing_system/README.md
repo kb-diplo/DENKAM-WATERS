@@ -36,10 +36,10 @@ A comprehensive water billing system with manual meter reading and customer port
 
 1. Clone the repository:
    ```bash
-   
-   cd water_billing_sytsem
+   git clone https://github.com/yourusername/denkam-waters.git
+   cd denkam-waters
+   ```
 
-     ```
 2. Create and activate virtual environment:
    ```bash
    python -m venv venv
@@ -116,12 +116,52 @@ python manage.py test
 
 ## Deployment
 
-### Production
-1. Set up PostgreSQL database
-2. Configure production settings in `.env`
-3. Collect static files:
+### Heroku Deployment
+1. Install Heroku CLI and login:
    ```bash
-   python manage.py collectstatic
+   npm install -g heroku
+   heroku login
+   ```
+
+2. Create a Heroku app:
+   ```bash
+   heroku create denkam-waters
+   ```
+
+3. Add PostgreSQL add-on:
+   ```bash
+   heroku addons:create heroku-postgresql:hobby-dev
+   ```
+
+4. Configure environment variables:
+   ```bash
+   heroku config:set DEBUG=False SECRET_KEY=your_secret_key
+   ```
+
+5. Add a Procfile to your project root:
+   ```
+   web: gunicorn your_project_name.wsgi --log-file -
+   ```
+
+6. Install additional dependencies:
+   ```bash
+   pip install gunicorn dj-database-url psycopg2-binary
+   pip freeze > requirements.txt
+   ```
+
+7. Deploy to Heroku:
+   ```bash
+   git push heroku main
+   ```
+
+8. Run migrations on Heroku:
+   ```bash
+   heroku run python manage.py migrate
+   ```
+
+9. Create a superuser on Heroku:
+   ```bash
+   heroku run python manage.py createsuperuser
    ```
 
 ### Docker
