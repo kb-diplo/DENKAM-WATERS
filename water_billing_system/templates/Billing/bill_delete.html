@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Bill {{ bill.bill_number }} - Denkam Waters{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Delete Bill</h1>
+    <a href="{% url 'billing:bill_detail' bill.pk %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Bill
+    </a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Confirm Deletion</h5>
+            </div>
+            <div class="card-body">
+                <p>Are you sure you want to delete bill <strong>{{ bill.bill_number }}</strong>?</p>
+                
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    This action cannot be undone. All associated data will be permanently deleted.
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h6>Bill Details</h6>
+                        <p class="mb-1"><strong>Customer:</strong> {{ bill.customer.name }}</p>
+                        <p class="mb-1"><strong>Billing Period:</strong> {{ bill.billing_period|date:"F Y" }}</p>
+                        <p class="mb-1"><strong>Amount:</strong> ₦{{ bill.amount|floatformat:2 }}</p>
+                        <p class="mb-0"><strong>Status:</strong> {{ bill.get_status_display }}</p>
+                    </div>
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Delete Bill
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,5 +1,5 @@
 from django import forms
-from .models import Bill, Tariff
+from .models import Bill, Tariff, Invoice
 from customers.models import Customer
 from meter_readings.models import MeterReading
 
@@ -12,7 +12,7 @@ class BillForm(forms.ModelForm):
     
     billing_period = forms.DateField(
         widget=forms.DateInput(attrs={
-            'type': 'date',
+            'type': 'month',
             'class': 'form-control'
         })
     )
@@ -62,6 +62,9 @@ class BillForm(forms.ModelForm):
         model = Bill
         fields = ['customer', 'billing_period', 'previous_reading', 'current_reading', 
                  'rate_per_unit', 'status', 'notes']
+        widgets = {
+            'notes': forms.Textarea(attrs={'rows': 3}),
+        }
     
     def clean(self):
         cleaned_data = super().clean()
@@ -82,4 +85,13 @@ class TariffForm(forms.ModelForm):
         fields = ['name', 'rate_per_unit', 'fixed_charge', 'description', 'is_active']
         widgets = {
             'description': forms.Textarea(attrs={'rows': 3}),
+        }
+
+class InvoiceForm(forms.ModelForm):
+    class Meta:
+        model = Invoice
+        fields = ['bill', 'invoice_number', 'due_date', 'notes']
+        widgets = {
+            'due_date': forms.DateInput(attrs={'type': 'date'}),
+            'notes': forms.Textarea(attrs={'rows': 3}),
         }

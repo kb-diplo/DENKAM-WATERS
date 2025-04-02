@@ -29,8 +29,8 @@ admin.site.index_title = 'Welcome to Denkam Waters Management Portal'
 urlpatterns = [
     path('', RedirectView.as_view(url='/admin/', permanent=False)),  # Redirect root to admin
     path('admin/', admin_site.urls),
+    path('', include('billing.urls')),
     path('accounts/', include('accounts.urls')),
-    path('billing/', include('billing.urls')),
     path('customers/', include('customers.urls')),
     path('meter-readings/', include('meter_readings.urls')),
     path('payments/', include('payments.urls')),

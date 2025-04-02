@@ -1,89 +1,103 @@
 {% extends 'base.html' %}
 
-{% block title %}Bill Details{% endblock %}
+{% block title %}Bill {{ bill.bill_number }} - Denkam Waters{% endblock %}
 
 {% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Bill Details</h1>
+    <div>
+        <a href="{% url 'billing:bill_update' bill.pk %}" class="btn btn-warning">
+            <i class="fas fa-edit"></i> Edit Bill
+        </a>
+        <a href="{% url 'billing:bill_list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to List
+        </a>
+    </div>
+</div>
+
 <div class="row">
-    <div class="col-md-6">
-        <div class="card">
+    <div class="col-md-8">
+        <div class="card mb-4">
             <div class="card-header">
-                <h4>Bill Details</h4>
+                <h5 class="card-title mb-0">Bill Information</h5>
             </div>
             <div class="card-body">
-                <dl class="row">
-                    <dt class="col-sm-4">Customer:</dt>
-                    <dd class="col-sm-8">{{ bill.customer.name }}</dd>
-                    
-                    <dt class="col-sm-4">Billing Period:</dt>
-                    <dd class="col-sm-8">{{ bill.billing_period }}</dd>
-                    
-                    <dt class="col-sm-4">Start Date:</dt>
-                    <dd class="col-sm-8">{{ bill.start_date|date:"M d, Y" }}</dd>
-                    
-                    <dt class="col-sm-4">End Date:</dt>
-                    <dd class="col-sm-8">{{ bill.end_date|date:"M d, Y" }}</dd>
-                    
-                    <dt class="col-sm-4">Previous Reading:</dt>
-                    <dd class="col-sm-8">{{ bill.previous_reading }} units</dd>
-                    
-                    <dt class="col-sm-4">Current Reading:</dt>
-                    <dd class="col-sm-8">{{ bill.current_reading }} units</dd>
-                    
-                    <dt class="col-sm-4">Usage:</dt>
-                    <dd class="col-sm-8">{{ bill.usage }} units</dd>
-                    
-                    <dt class="col-sm-4">Tariff:</dt>
-                    <dd class="col-sm-8">{{ bill.tariff.name }} (KES {{ bill.tariff.rate_per_unit }}/unit)</dd>
-                    
-                    <dt class="col-sm-4">Fixed Charge:</dt>
-                    <dd class="col-sm-8">KES {{ bill.tariff.fixed_charge }}</dd>
-                    
-                    <dt class="col-sm-4">Amount Due:</dt>
-                    <dd class="col-sm-8">KES {{ bill.amount_due }}</dd>
-                    
-                    <dt class="col-sm-4">Status:</dt>
-                    <dd class="col-sm-8">
-                        <span class="badge bg-{% if bill.status == 'paid' %}success{% elif bill.status == 'overdue' %}danger{% else %}warning{% endif %}">
-                            {{ bill.get_status_display }}
-                        </span>
-                    </dd>
-                    
-                    <dt class="col-sm-4">Due Date:</dt>
-                    <dd class="col-sm-8">{{ bill.due_date|date:"M d, Y" }}</dd>
-                </dl>
-                
-                <div class="mt-3">
-                    <a href="{% url 'billing:bill_update' bill.pk %}" class="btn btn-warning">Edit</a>
-                    <a href="{% url 'billing:generate_invoice' bill.pk %}" class="btn btn-primary">Generate Invoice</a>
-                    <a href="{% url 'billing:bill_list' %}" class="btn btn-secondary">Back to List</a>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Bill Number:</strong> {{ bill.bill_number }}</p>
+                        <p><strong>Customer:</strong> {{ bill.customer.name }}</p>
+                        <p><strong>Billing Period:</strong> {{ bill.billing_period|date:"F Y" }}</p>
+                        <p><strong>Status:</strong> 
+                            <span class="badge {% if bill.status == 'pending' %}bg-warning
+                                             {% elif bill.status == 'paid' %}bg-success
+                                             {% elif bill.status == 'overdue' %}bg-danger
+                                             {% else %}bg-secondary{% endif %}">
+                                {{ bill.get_status_display }}
+                            </span>
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Previous Reading:</strong> {{ bill.previous_reading }}</p>
+                        <p><strong>Current Reading:</strong> {{ bill.current_reading }}</p>
+                        <p><strong>Consumption:</strong> {{ bill.consumption }} units</p>
+                        <p><strong>Rate per Unit:</strong> ₦{{ bill.rate_per_unit }}</p>
+                        <p><strong>Total Amount:</strong> ₦{{ bill.amount|floatformat:2 }}</p>
+                    </div>
                 </div>
+                {% if bill.notes %}
+                <div class="mt-3">
+                    <h6>Notes:</h6>
+                    <p>{{ bill.notes }}</p>
+                </div>
+                {% endif %}
             </div>
         </div>
-    </div>
-    
-    <div class="col-md-6">
+
+        {% if bill.invoice %}
         <div class="card">
             <div class="card-header">
-                <h4>Payment History</h4>
+                <h5 class="card-title mb-0">Invoice Information</h5>
             </div>
             <div class="card-body">
-                {% if bill.payments.all %}
-                    <ul class="list-group">
-                        {% for payment in bill.payments.all %}
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                {{ payment.payment_date|date:"M d, Y" }}
-                                <span class="badge bg-success rounded-pill">
-                                    KES {{ payment.amount_paid }}
-                                </span>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p>No payments recorded for this bill.</p>
-                {% endif %}
-                
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Invoice Number:</strong> {{ bill.invoice.invoice_number }}</p>
+                        <p><strong>Due Date:</strong> {{ bill.invoice.due_date|date:"F d, Y" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Created:</strong> {{ bill.invoice.created_at|date:"F d, Y H:i" }}</p>
+                        <p><strong>Updated:</strong> {{ bill.invoice.updated_at|date:"F d, Y H:i" }}</p>
+                    </div>
+                </div>
+                {% if bill.invoice.notes %}
                 <div class="mt-3">
-                    <a href="{% url 'payments:payment_create' %}?bill={{ bill.id }}" class="btn btn-success">Record Payment</a>
+                    <h6>Notes:</h6>
+                    <p>{{ bill.invoice.notes }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'billing:bill_pdf' bill.pk %}" class="btn btn-primary">
+                        <i class="fas fa-file-pdf"></i> Download PDF
+                    </a>
+                    {% if bill.status == 'pending' %}
+                    <a href="{% url 'billing:bill_mark_paid' bill.pk %}" class="btn btn-success">
+                        <i class="fas fa-check"></i> Mark as Paid
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'billing:bill_delete' bill.pk %}" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Delete Bill
+                    </a>
                 </div>
             </div>
         </div>

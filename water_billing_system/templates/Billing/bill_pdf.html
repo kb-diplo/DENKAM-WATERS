@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Bill {{ bill.bill_number }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .company-name {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .company-address {
+            font-size: 14px;
+            color: #666;
+        }
+        .bill-info {
+            margin-bottom: 30px;
+        }
+        .bill-info table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .bill-info td {
+            padding: 5px 0;
+        }
+        .bill-info td:first-child {
+            width: 150px;
+            font-weight: bold;
+        }
+        .bill-details {
+            margin-bottom: 30px;
+            border: 1px solid #ddd;
+            border-collapse: collapse;
+        }
+        .bill-details th,
+        .bill-details td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        .bill-details th {
+            background-color: #f5f5f5;
+        }
+        .total {
+            text-align: right;
+            margin-top: 20px;
+        }
+        .total table {
+            margin-left: auto;
+            border-collapse: collapse;
+        }
+        .total td {
+            padding: 5px 20px;
+        }
+        .total td:first-child {
+            font-weight: bold;
+        }
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 10px;
+            color: #666;
+        }
+        .watermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 60px;
+            color: rgba(0, 0, 0, 0.1);
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="watermark">PAID</div>
+
+    <div class="header">
+        <div class="company-name">Denkam Waters</div>
+        <div class="company-address">
+            123 Water Street<br>
+            Lagos, Nigeria<br>
+            Phone: +234 123 456 7890<br>
+            Email: info@denkamwaters.com
+        </div>
+    </div>
+
+    <div class="bill-info">
+        <table>
+            <tr>
+                <td>Bill Number:</td>
+                <td>{{ bill.bill_number }}</td>
+            </tr>
+            <tr>
+                <td>Date:</td>
+                <td>{{ bill.created_at|date:"F d, Y" }}</td>
+            </tr>
+            <tr>
+                <td>Due Date:</td>
+                <td>{{ bill.invoice.due_date|date:"F d, Y" }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="customer-info">
+        <h3>Customer Information</h3>
+        <table>
+            <tr>
+                <td>Name:</td>
+                <td>{{ bill.customer.name }}</td>
+            </tr>
+            <tr>
+                <td>Address:</td>
+                <td>{{ bill.customer.address }}</td>
+            </tr>
+            <tr>
+                <td>Phone:</td>
+                <td>{{ bill.customer.phone }}</td>
+            </tr>
+            <tr>
+                <td>Email:</td>
+                <td>{{ bill.customer.email }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="bill-details">
+        <h3>Bill Details</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Water Consumption ({{ bill.consumption }} units @ ₦{{ bill.rate_per_unit }}/unit)</td>
+                    <td>₦{{ bill.amount|floatformat:2 }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="total">
+        <table>
+            <tr>
+                <td>Subtotal:</td>
+                <td>₦{{ bill.amount|floatformat:2 }}</td>
+            </tr>
+            <tr>
+                <td>VAT (7.5%):</td>
+                <td>₦{{ bill.amount|multiply:0.075|floatformat:2 }}</td>
+            </tr>
+            <tr>
+                <td><strong>Total Amount:</strong></td>
+                <td><strong>₦{{ bill.amount|multiply:1.075|floatformat:2 }}</strong></td>
+            </tr>
+        </table>
+    </div>
+
+    {% if bill.notes %}
+    <div class="notes">
+        <h3>Notes</h3>
+        <p>{{ bill.notes }}</p>
+    </div>
+    {% endif %}
+
+    <div class="footer">
+        <p>This is a computer-generated bill. No signature is required.</p>
+        <p>For any queries, please contact our customer service.</p>
+        <p>Thank you for choosing Denkam Waters!</p>
+    </div>
+</body>
+</html> 

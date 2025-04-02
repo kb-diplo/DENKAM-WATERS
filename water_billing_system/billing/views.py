@@ -10,11 +10,14 @@ from django.views.generic import (
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
 from django.http import HttpResponse
-from django.template.loader import get_template
+from django.template.loader import get_template, render_to_string
 from xhtml2pdf import pisa
 from .models import Bill, Tariff, Invoice
 from .forms import BillForm, TariffForm
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
+from django.utils import timezone
+from io import BytesIO
 
 class StaffRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
     def test_func(self):
@@ -100,18 +103,14 @@ class TariffDeleteView(StaffRequiredMixin, DeleteView):
 
 @login_required
 def bill_list(request):
-    if request.user.role in ['admin', 'supplier']:
-        bills = Bill.objects.all().order_by('-billing_period')
-    else:
-        bills = Bill.objects.filter(customer__user=request.user).order_by('-billing_period')
-    return render(request, 'Billing/bill_list.html', {'bills': bills})
+    bills = Bill.objects.all().order_by('-created_at')
+    paginator = Paginator(bills, 10)
+    page = request.GET.get('page')
+    bills = paginator.get_page(page)
+    return render(request, 'billing/bill_list.html', {'bills': bills})
 
 @login_required
 def bill_create(request):
-    if request.user.role not in ['admin', 'supplier']:
-        messages.error(request, "You don't have permission to create bills.")
-        return redirect('billing:bill_list')
-    
     if request.method == 'POST':
         form = BillForm(request.POST)
         if form.is_valid():
@@ -120,42 +119,65 @@ def bill_create(request):
             return redirect('billing:bill_detail', pk=bill.pk)
     else:
         form = BillForm()
-    return render(request, 'Billing/bill_form.html', {'form': form, 'title': 'Create Bill'})
+    return render(request, 'billing/bill_form.html', {'form': form})
 
 @login_required
 def bill_detail(request, pk):
     bill = get_object_or_404(Bill, pk=pk)
-    if request.user.role not in ['admin', 'supplier'] and bill.customer.user != request.user:
-        messages.error(request, "You don't have permission to view this bill.")
-        return redirect('billing:bill_list')
-    return render(request, 'Billing/bill_detail.html', {'bill': bill})
+    return render(request, 'billing/bill_detail.html', {'bill': bill})
 
 @login_required
 def bill_update(request, pk):
     bill = get_object_or_404(Bill, pk=pk)
-    if request.user.role not in ['admin', 'supplier']:
-        messages.error(request, "You don't have permission to update bills.")
-        return redirect('billing:bill_list')
-    
     if request.method == 'POST':
         form = BillForm(request.POST, instance=bill)
         if form.is_valid():
-            form.save()
+            bill = form.save()
             messages.success(request, 'Bill updated successfully.')
-            return redirect('billing:bill_detail', pk=pk)
+            return redirect('billing:bill_detail', pk=bill.pk)
     else:
         form = BillForm(instance=bill)
-    return render(request, 'Billing/bill_form.html', {'form': form, 'title': 'Update Bill'})
+    return render(request, 'billing/bill_form.html', {'form': form})
 
 @login_required
 def bill_delete(request, pk):
     bill = get_object_or_404(Bill, pk=pk)
-    if request.user.role not in ['admin', 'supplier']:
-        messages.error(request, "You don't have permission to delete bills.")
-        return redirect('billing:bill_list')
-    
     if request.method == 'POST':
         bill.delete()
         messages.success(request, 'Bill deleted successfully.')
         return redirect('billing:bill_list')
-    return render(request, 'Billing/bill_confirm_delete.html', {'bill': bill})
+    return render(request, 'billing/bill_delete.html', {'bill': bill})
+
+@login_required
+def bill_pdf(request, pk):
+    bill = get_object_or_404(Bill, pk=pk)
+    template = get_template('billing/bill_pdf.html')
+    html = template.render({'bill': bill})
+    
+    # Create a file-like buffer to receive PDF data
+    buffer = BytesIO()
+    
+    # Create the PDF object, using the BytesIO buffer as its "file"
+    pisa_status = pisa.CreatePDF(html, dest=buffer)
+    
+    # If the PDF creation failed, return error response
+    if pisa_status.err:
+        return HttpResponse('We had some errors with creating the PDF <pre>' + html + '</pre>')
+    
+    # FileResponse sets the Content-Disposition header so that browsers
+    # present the option to save the file.
+    buffer.seek(0)
+    response = HttpResponse(buffer.getvalue(), content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="bill_{bill.bill_number}.pdf"'
+    
+    return response
+
+@login_required
+def bill_mark_paid(request, pk):
+    bill = get_object_or_404(Bill, pk=pk)
+    if request.method == 'POST':
+        bill.status = 'paid'
+        bill.save()
+        messages.success(request, 'Bill marked as paid successfully.')
+        return redirect('billing:bill_detail', pk=bill.pk)
+    return render(request, 'billing/bill_detail.html', {'bill': bill})
