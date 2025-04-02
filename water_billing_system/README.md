@@ -36,8 +36,8 @@ A comprehensive water billing system with manual meter reading and customer port
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/denkam-waters.git
-   cd denkam-waters
+   git clone https://github.com/kb-diplo/DENKAM-WATERS.git
+   cd water_billing_system
    ```
 
 2. Create and activate virtual environment:
@@ -125,7 +125,7 @@ python manage.py test
 
 2. Create a Heroku app:
    ```bash
-   heroku create denkam-waters
+   heroku create water_billing_system
    ```
 
 3. Add PostgreSQL add-on:
