@@ -82,9 +82,11 @@ class BillForm(forms.ModelForm):
 class TariffForm(forms.ModelForm):
     class Meta:
         model = Tariff
-        fields = ['name', 'rate_per_unit', 'fixed_charge', 'description', 'is_active']
+        fields = ['name', 'rate_per_unit', 'description']
         widgets = {
             'description': forms.Textarea(attrs={'rows': 3}),
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'rate_per_unit': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
         }
 
 class InvoiceForm(forms.ModelForm):
