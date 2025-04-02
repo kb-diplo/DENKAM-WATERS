@@ -13,7 +13,7 @@ from django.http import HttpResponse
 from django.template.loader import get_template, render_to_string
 from xhtml2pdf import pisa
 from .models import Bill, Tariff, Invoice
-from .forms import BillForm, TariffForm
+from .forms import BillForm, TariffForm, InvoiceForm
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.utils import timezone
@@ -181,3 +181,52 @@ def bill_mark_paid(request, pk):
         messages.success(request, 'Bill marked as paid successfully.')
         return redirect('billing:bill_detail', pk=bill.pk)
     return render(request, 'billing/bill_detail.html', {'bill': bill})
+
+@login_required
+def invoice_list(request):
+    invoices = Invoice.objects.all().order_by('-created_at')
+    paginator = Paginator(invoices, 10)
+    page = request.GET.get('page')
+    invoices = paginator.get_page(page)
+    return render(request, 'billing/invoice_list.html', {'invoices': invoices})
+
+@login_required
+def invoice_create(request):
+    if request.method == 'POST':
+        form = InvoiceForm(request.POST)
+        if form.is_valid():
+            invoice = form.save()
+            messages.success(request, 'Invoice created successfully.')
+            return redirect('billing:invoice_detail', pk=invoice.pk)
+    else:
+        form = InvoiceForm()
+    return render(request, 'billing/invoice_form.html', {'form': form})
+
+@login_required
+def invoice_detail(request, pk):
+    invoice = get_object_or_404(Invoice, pk=pk)
+    return render(request, 'billing/invoice_detail.html', {'invoice': invoice})
+
+@login_required
+def invoice_pdf(request, pk):
+    invoice = get_object_or_404(Invoice, pk=pk)
+    template = get_template('billing/invoice_pdf.html')
+    html = template.render({'invoice': invoice})
+    
+    # Create a file-like buffer to receive PDF data
+    buffer = BytesIO()
+    
+    # Create the PDF object, using the BytesIO buffer as its "file"
+    pisa_status = pisa.CreatePDF(html, dest=buffer)
+    
+    # If the PDF creation failed, return error response
+    if pisa_status.err:
+        return HttpResponse('We had some errors with creating the PDF <pre>' + html + '</pre>')
+    
+    # FileResponse sets the Content-Disposition header so that browsers
+    # present the option to save the file.
+    buffer.seek(0)
+    response = HttpResponse(buffer.getvalue(), content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="invoice_{invoice.invoice_number}.pdf"'
+    
+    return response
