@@ -29,6 +29,7 @@ urlpatterns = [
     path('billing/', include('billing.urls', namespace='billing')),
     path('payments/', include('payments.urls', namespace='payments')),
     path('reports/', include('reports.urls', namespace='reports')),
+    path('api/', include('api.urls')),
 ]
 
 if settings.DEBUG:

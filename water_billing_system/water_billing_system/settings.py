@@ -50,6 +50,8 @@ INSTALLED_APPS = [
     'reports',
     'crispy_forms',
     'crispy_bootstrap5',
+    'rest_framework',
+    'rest_framework.authtoken',
 ]
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
