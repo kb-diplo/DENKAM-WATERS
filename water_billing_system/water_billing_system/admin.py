@@ -1,7 +1,7 @@
 from django.contrib.admin import AdminSite
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth import get_user_model
-from django.db.models import Count, Sum
+from django.db.models import Count, Sum, F
 from django.db.models.functions import TruncMonth
 from django.utils import timezone
 from datetime import timedelta
@@ -31,12 +31,14 @@ class CustomAdminSite(AdminSite):
             )
         recent_activity = sorted(recent_activity, key=lambda x: x.created_at, reverse=True)[:10]
         
-        # Get monthly statistics
+        # Calculate bill amounts using rate_per_unit and consumption
         monthly_stats = Bill.objects.annotate(
-            month=TruncMonth('created_at')
+            month=TruncMonth('created_at'),
+            consumption=F('current_reading') - F('previous_reading'),
+            bill_amount=F('consumption') * F('rate_per_unit')
         ).values('month').annotate(
             count=Count('id'),
-            total=Sum('amount')
+            total=Sum('bill_amount')
         ).order_by('month')
         
         context = {
