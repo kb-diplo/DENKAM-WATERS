@@ -56,9 +56,81 @@ class BillDeleteView(StaffRequiredMixin, DeleteView):
     template_name = 'Billing/bill_confirm_delete.html'
     success_url = reverse_lazy('billing:bill_list')
 
-def generate_invoice(request, pk):
-    bill = get_object_or_404(Bill, pk=pk)
+@login_required
+def bill_list(request):
+    if request.user.role in ['supplier', 'admin']:
+        bills = Bill.objects.all().order_by('-created_at')
+    else:
+        # For customers, only show their own bills
+        bills = Bill.objects.filter(customer=request.user.customer_profile).order_by('-created_at')
     
+    paginator = Paginator(bills, 10)
+    page = request.GET.get('page')
+    bills = paginator.get_page(page)
+    return render(request, 'Billing/bill_list.html', {'bills': bills})
+
+@login_required
+def bill_create(request):
+    if request.user.role not in ['supplier', 'admin']:
+        messages.error(request, 'You do not have permission to create bills.')
+        return redirect('billing:bill_list')
+        
+    if request.method == 'POST':
+        form = BillForm(request.POST)
+        if form.is_valid():
+            bill = form.save()
+            messages.success(request, 'Bill created successfully.')
+            return redirect('billing:bill_detail', pk=bill.pk)
+    else:
+        form = BillForm()
+    return render(request, 'billing/bill_form.html', {'form': form})
+
+@login_required
+def bill_detail(request, pk):
+    bill = get_object_or_404(Bill, pk=pk)
+    # Check if user has permission to view this bill
+    if request.user.role not in ['supplier', 'admin'] and bill.customer != request.user.customer_profile:
+        messages.error(request, 'You do not have permission to view this bill.')
+        return redirect('billing:bill_list')
+    return render(request, 'billing/bill_detail.html', {'bill': bill})
+
+@login_required
+def bill_update(request, pk):
+    if request.user.role not in ['supplier', 'admin']:
+        messages.error(request, 'You do not have permission to update bills.')
+        return redirect('billing:bill_list')
+        
+    bill = get_object_or_404(Bill, pk=pk)
+    if request.method == 'POST':
+        form = BillForm(request.POST, instance=bill)
+        if form.is_valid():
+            bill = form.save()
+            messages.success(request, 'Bill updated successfully.')
+            return redirect('billing:bill_detail', pk=bill.pk)
+    else:
+        form = BillForm(instance=bill)
+    return render(request, 'billing/bill_form.html', {'form': form})
+
+@login_required
+def bill_delete(request, pk):
+    if request.user.role not in ['supplier', 'admin']:
+        messages.error(request, 'You do not have permission to delete bills.')
+        return redirect('billing:bill_list')
+        
+    bill = get_object_or_404(Bill, pk=pk)
+    if request.method == 'POST':
+        bill.delete()
+        messages.success(request, 'Bill deleted successfully.')
+        return redirect('billing:bill_list')
+    return render(request, 'billing/bill_delete.html', {'bill': bill})
+
+@login_required
+def generate_invoice(request, pk):
+    if request.user.role not in ['supplier', 'admin']:
+        messages.error(request, 'You do not have permission to generate invoices.')
+        return redirect('billing:bill_list')
+        
+    bill = get_object_or_404(Bill, pk=pk)
     # Create or get existing invoice
     invoice, created = Invoice.objects.get_or_create(bill=bill)
     if created:
@@ -100,53 +172,6 @@ class TariffDeleteView(StaffRequiredMixin, DeleteView):
     model = Tariff
     template_name = 'Billing/tariff_confirm_delete.html'
     success_url = reverse_lazy('billing:tariff_list')
-
-@login_required
-def bill_list(request):
-    bills = Bill.objects.all().order_by('-created_at')
-    paginator = Paginator(bills, 10)
-    page = request.GET.get('page')
-    bills = paginator.get_page(page)
-    return render(request, 'billing/bill_list.html', {'bills': bills})
-
-@login_required
-def bill_create(request):
-    if request.method == 'POST':
-        form = BillForm(request.POST)
-        if form.is_valid():
-            bill = form.save()
-            messages.success(request, 'Bill created successfully.')
-            return redirect('billing:bill_detail', pk=bill.pk)
-    else:
-        form = BillForm()
-    return render(request, 'billing/bill_form.html', {'form': form})
-
-@login_required
-def bill_detail(request, pk):
-    bill = get_object_or_404(Bill, pk=pk)
-    return render(request, 'billing/bill_detail.html', {'bill': bill})
-
-@login_required
-def bill_update(request, pk):
-    bill = get_object_or_404(Bill, pk=pk)
-    if request.method == 'POST':
-        form = BillForm(request.POST, instance=bill)
-        if form.is_valid():
-            bill = form.save()
-            messages.success(request, 'Bill updated successfully.')
-            return redirect('billing:bill_detail', pk=bill.pk)
-    else:
-        form = BillForm(instance=bill)
-    return render(request, 'billing/bill_form.html', {'form': form})
-
-@login_required
-def bill_delete(request, pk):
-    bill = get_object_or_404(Bill, pk=pk)
-    if request.method == 'POST':
-        bill.delete()
-        messages.success(request, 'Bill deleted successfully.')
-        return redirect('billing:bill_list')
-    return render(request, 'billing/bill_delete.html', {'bill': bill})
 
 @login_required
 def bill_pdf(request, pk):

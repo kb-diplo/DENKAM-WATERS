@@ -8,143 +8,154 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
     <style>
-        .sidebar {
-            min-height: 100vh;
-            background-color: #343a40;
-            padding-top: 20px;
+        body {
+            background-color: #ffffff;
         }
-        .sidebar .nav-link {
-            color: #fff;
-            padding: 10px 20px;
-            margin: 5px 0;
-            border-radius: 5px;
+        .navbar {
+            background-color: #0d6efd !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        .sidebar .nav-link:hover {
-            background-color: #495057;
+        .navbar-brand, .nav-link {
+            color: white !important;
         }
-        .sidebar .nav-link.active {
+        .nav-link:hover {
+            color: rgba(255,255,255,0.8) !important;
+        }
+        .nav-link.active {
+            color: white !important;
+            font-weight: bold;
+        }
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .card {
+            border: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+        .btn-primary {
             background-color: #0d6efd;
+            border-color: #0d6efd;
         }
-        .main-content {
-            padding: 20px;
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+            border-color: #0b5ed7;
         }
-        .profile-picture {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-        .navbar-brand img {
-            height: 40px;
-            margin-right: 10px;
+        .alert {
+            border-radius: 8px;
         }
     </style>
 </head>
 <body>
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Sidebar -->
-            <div class="col-md-3 col-lg-2 px-0 sidebar">
-                <div class="text-center mb-4">
-                    <img src="{% static 'images/logo.png' %}" alt="Logo" class="img-fluid mb-3" style="max-width: 150px;">
-                    <h5 class="text-white">Water Billing System</h5>
-                </div>
-                <nav class="nav flex-column">
+    <!-- Top Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark mb-4">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'accounts:dashboard' %}">
+                <i class="bi bi-droplet-fill me-2"></i>
+                Water Billing System
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     {% if user.is_authenticated %}
-                        {% if user.is_supplier or user.is_staff %}
-                            <a class="nav-link {% if request.resolver_match.url_name == 'customer_list' %}active{% endif %}" href="{% url 'customers:customer_list' %}">
-                                <i class="bi bi-people"></i> Customers
-                            </a>
-                            <a class="nav-link {% if 'meter_readings' in request.path %}active{% endif %}" href="{% url 'meter_readings:reading_list' %}">
-                                <i class="bi bi-speedometer2"></i> Meter Readings
-                            </a>
-                            <a class="nav-link {% if 'billing' in request.path %}active{% endif %}" href="{% url 'billing:bill_list' %}">
-                                <i class="bi bi-receipt"></i> Bills
-                            </a>
-                            <a class="nav-link {% if 'payments' in request.path %}active{% endif %}" href="{% url 'payments:payment_list' %}">
-                                <i class="bi bi-cash"></i> Payments
-                            </a>
-                            <a class="nav-link {% if 'reports' in request.path %}active{% endif %}" href="{% url 'reports:report_list' %}">
-                                <i class="bi bi-graph-up"></i> Reports
-                            </a>
+                        {% if user.role == 'customer' %}
+                            <li class="nav-item">
+                                <a class="nav-link {% if request.resolver_match.namespace == 'billing' %}active{% endif %}" href="{% url 'billing:bill_list' %}">
+                                    <i class="bi bi-receipt"></i> My Bills
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {% if request.resolver_match.namespace == 'meter_readings' %}active{% endif %}" href="{% url 'meter_readings:customer_readings' user.customer_profile.id %}">
+                                    <i class="bi bi-speedometer2"></i> My Readings
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {% if request.resolver_match.namespace == 'payments' %}active{% endif %}" href="{% url 'payments:customer_payments' user.customer_profile.id %}">
+                                    <i class="bi bi-cash"></i> My Payments
+                                </a>
+                            </li>
+                        {% elif user.role == 'meter_reader' %}
+                            <li class="nav-item">
+                                <a class="nav-link {% if request.resolver_match.namespace == 'meter_readings' %}active{% endif %}" href="{% url 'meter_readings:reading_list' %}">
+                                    <i class="bi bi-speedometer2"></i> Meter Readings
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {% if request.resolver_match.namespace == 'customers' %}active{% endif %}" href="{% url 'customers:customer_list' %}">
+                                    <i class="bi bi-people"></i> Customers
+                                </a>
+                            </li>
                         {% else %}
-                            <a class="nav-link {% if 'billing' in request.path %}active{% endif %}" href="{% url 'billing:bill_list' %}">
-                                <i class="bi bi-receipt"></i> My Bills
-                            </a>
-                            <a class="nav-link {% if 'meter_readings' in request.path %}active{% endif %}" href="{% url 'meter_readings:reading_list' %}">
-                                <i class="bi bi-speedometer2"></i> My Readings
-                            </a>
-                            <a class="nav-link {% if 'payments' in request.path %}active{% endif %}" href="{% url 'payments:payment_list' %}">
-                                <i class="bi bi-cash"></i> My Payments
-                            </a>
+                            <li class="nav-item">
+                                <a class="nav-link {% if request.resolver_match.namespace == 'customers' %}active{% endif %}" href="{% url 'customers:customer_list' %}">
+                                    <i class="bi bi-people"></i> Customers
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {% if request.resolver_match.namespace == 'meter_readings' %}active{% endif %}" href="{% url 'meter_readings:reading_list' %}">
+                                    <i class="bi bi-speedometer2"></i> Meter Readings
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {% if request.resolver_match.namespace == 'billing' %}active{% endif %}" href="{% url 'billing:bill_list' %}">
+                                    <i class="bi bi-receipt"></i> Bills
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {% if request.resolver_match.namespace == 'payments' %}active{% endif %}" href="{% url 'payments:payment_list' %}">
+                                    <i class="bi bi-cash"></i> Payments
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {% if request.resolver_match.namespace == 'reports' %}active{% endif %}" href="{% url 'reports:report_list' %}">
+                                    <i class="bi bi-graph-up"></i> Reports
+                                </a>
+                            </li>
                         {% endif %}
                     {% endif %}
-                </nav>
-            </div>
-
-            <!-- Main Content -->
-            <div class="col-md-9 col-lg-10 main-content">
-                <!-- Top Navigation -->
-                <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
-                    <div class="container-fluid">
-                        <a class="navbar-brand" href="{% url 'accounts:dashboard' %}">
-                            <img src="{% static 'images/logo.png' %}" alt="Logo">
-                            Water Billing System
-                        </a>
-                        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                            <span class="navbar-toggler-icon"></span>
-                        </button>
-                        <div class="collapse navbar-collapse" id="navbarNav">
-                            <ul class="navbar-nav ms-auto">
-                                {% if user.is_authenticated %}
-                                    <li class="nav-item dropdown">
-                                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                                            {% if user.profile_picture %}
-                                                <img src="{{ user.profile_picture.url }}" alt="Profile" class="profile-picture me-2">
-                                            {% else %}
-                                                <i class="bi bi-person-circle"></i>
-                                            {% endif %}
-                                            {{ user.get_full_name|default:user.username }}
-                                        </a>
-                                        <ul class="dropdown-menu dropdown-menu-end">
-                                            <li><a class="dropdown-item" href="{% url 'accounts:profile' %}">Profile</a></li>
-                                            {% if user.is_staff %}
-                                                <li><a class="dropdown-item" href="{% url 'admin:index' %}">Admin</a></li>
-                                            {% endif %}
-                                            <li><hr class="dropdown-divider"></li>
-                                            <li><a class="dropdown-item" href="{% url 'accounts:logout' %}">Logout</a></li>
-                                        </ul>
-                                    </li>
-                                {% else %}
-                                    <li class="nav-item">
-                                        <a class="nav-link" href="{% url 'accounts:login' %}">Login</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link" href="{% url 'accounts:register' %}">Register</a>
-                                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-person-circle"></i> {{ user.get_full_name|default:user.username }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item" href="{% url 'accounts:dashboard' %}">Dashboard</a></li>
+                                {% if user.role in 'supplier,admin' %}
+                                    <li><a class="dropdown-item" href="{% url 'admin:index' %}">Admin</a></li>
                                 {% endif %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'accounts:logout' %}">Logout</a></li>
                             </ul>
-                        </div>
-                    </div>
-                </nav>
-
-                <!-- Messages -->
-                {% if messages %}
-                    {% for message in messages %}
-                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    {% endfor %}
-                {% endif %}
-
-                <!-- Main Content Area -->
-                <div class="container-fluid">
-                    {% block content %}
-                    {% endblock %}
-                </div>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'accounts:login' %}">Login</a>
+                        </li>
+                    {% endif %}
+                </ul>
             </div>
         </div>
+    </nav>
+
+    <!-- Messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Main Content Area -->
+    <div class="container-fluid">
+        {% block content %}
+        {% endblock %}
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
