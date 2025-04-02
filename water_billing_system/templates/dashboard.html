@@ -1,118 +1,344 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Dashboard{% endblock %}
+{% block title %}Dashboard - Denkam Waters{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-12">
-        <h2>Welcome, {{ user.username }}!</h2>
-        <p class="lead">Denkam Waters Billing System</p>
-        
-        {% if user.role == 'supplier' or user.role == 'admin' %}
-            <div class="row mt-4">
-                <div class="col-md-3">
-                    <div class="card text-white bg-primary mb-3">
-                        <div class="card-body">
-                            <h5 class="card-title">Total Customers</h5>
-                            <p class="card-text display-4">{{ customer_count }}</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card text-white bg-success mb-3">
-                        <div class="card-body">
-                            <h5 class="card-title">Paid Bills</h5>
-                            <p class="card-text display-4">{{ paid_bills_count }}</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card text-white bg-warning mb-3">
-                        <div class="card-body">
-                            <h5 class="card-title">Pending Bills</h5>
-                            <p class="card-text display-4">{{ pending_bills_count }}</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card text-white bg-danger mb-3">
-                        <div class="card-body">
-                            <h5 class="card-title">Overdue Bills</h5>
-                            <p class="card-text display-4">{{ overdue_bills_count }}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        {% elif user.role == 'customer' %}
-            <div class="row mt-4">
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5>Recent Bills</h5>
-                        </div>
-                        <div class="card-body">
-                            {% if recent_bills %}
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>Period</th>
-                                            <th>Amount</th>
-                                            <th>Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for bill in recent_bills %}
-                                            <tr>
-                                                <td>{{ bill.billing_period|date:"F Y" }}</td>
-                                                <td>KES {{ bill.amount|floatformat:2 }}</td>
-                                                <td>
-                                                    <span class="badge {% if bill.status == 'paid' %}bg-success{% elif bill.status == 'pending' %}bg-warning{% else %}bg-danger{% endif %}">
-                                                        {{ bill.get_status_display }}
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            {% else %}
-                                <p>No recent bills found.</p>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5>Recent Payments</h5>
-                        </div>
-                        <div class="card-body">
-                            {% if recent_payments %}
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>Date</th>
-                                            <th>Amount</th>
-                                            <th>Reference</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for payment in recent_payments %}
-                                            <tr>
-                                                <td>{{ payment.payment_date|date:"d M Y" }}</td>
-                                                <td>KES {{ payment.amount|floatformat:2 }}</td>
-                                                <td>{{ payment.reference_number }}</td>
-                                            </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            {% else %}
-                                <p>No recent payments found.</p>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        {% endif %}
+<div class="container-fluid py-4">
+    <!-- Welcome Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="mb-3">Welcome, {{ user.get_full_name|default:user.username }}!</h2>
+            <p class="text-muted">{{ user.get_role_display }} Dashboard</p>
+        </div>
     </div>
+
+    {% if user.role == 'admin' or user.role == 'supplier' %}
+    <!-- Admin/Supplier Dashboard -->
+    <div class="row">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Customers</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ customer_count }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-users fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Paid Bills</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ paid_bills_count }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Pending Bills</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ pending_bills_count }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Overdue Bills</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ overdue_bills_count }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activities -->
+    <div class="row">
+        <div class="col-xl-8 col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Recent Meter Readings</h6>
+                    <a href="{% url 'meter_readings:reading_list' %}" class="btn btn-sm btn-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    {% if recent_readings %}
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Customer</th>
+                                    <th>Meter ID</th>
+                                    <th>Reading</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for reading in recent_readings %}
+                                <tr>
+                                    <td>{{ reading.customer.name }}</td>
+                                    <td>{{ reading.meter.meter_id }}</td>
+                                    <td>{{ reading.reading_value }} m³</td>
+                                    <td>{{ reading.reading_date|date:"d M Y" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-center text-muted my-5">No recent meter readings found.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Recent Payments</h6>
+                </div>
+                <div class="card-body">
+                    {% if recent_payments %}
+                    <div class="list-group list-group-flush">
+                        {% for payment in recent_payments %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ payment.customer.name }}</h6>
+                                <small>{{ payment.payment_date|date:"d M Y" }}</small>
+                            </div>
+                            <p class="mb-1">KES {{ payment.amount|floatformat:2 }}</p>
+                            <small class="text-muted">Ref: {{ payment.reference_number }}</small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-center text-muted my-5">No recent payments found.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% elif user.role == 'meter_reader' %}
+    <!-- Meter Reader Dashboard -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Today's Reading Schedule</h6>
+                    <a href="{% url 'meter_readings:reading_list' %}" class="btn btn-sm btn-primary">View All Readings</a>
+                </div>
+                <div class="card-body">
+                    {% if scheduled_readings %}
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Customer</th>
+                                    <th>Meter ID</th>
+                                    <th>Address</th>
+                                    <th>Last Reading</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for reading in scheduled_readings %}
+                                <tr>
+                                    <td>{{ reading.customer.name }}</td>
+                                    <td>{{ reading.meter.meter_id }}</td>
+                                    <td>{{ reading.customer.address }}</td>
+                                    <td>{{ reading.last_reading }} m³</td>
+                                    <td>
+                                        <a href="{% url 'meter_readings:reading_create' reading.meter.id %}" class="btn btn-sm btn-primary">Record Reading</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-center text-muted my-5">No readings scheduled for today.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% elif user.role == 'customer' %}
+    <!-- Customer Dashboard -->
+    <div class="row">
+        <!-- Current Usage Card -->
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Current Month Usage</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ current_month_usage|default:"0" }} m³</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-tint fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Outstanding Balance Card -->
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Outstanding Balance</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">KES {{ outstanding_balance|default:"0"|floatformat:2 }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-money-bill fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Last Payment Card -->
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Last Payment</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {% if last_payment %}
+                                KES {{ last_payment.amount|floatformat:2 }}
+                                <small class="d-block text-muted">{{ last_payment.payment_date|date:"d M Y" }}</small>
+                                {% else %}
+                                No payments yet
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-receipt fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bills and Payments History -->
+    <div class="row">
+        <div class="col-xl-6 col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Recent Bills</h6>
+                </div>
+                <div class="card-body">
+                    {% if recent_bills %}
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Period</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for bill in recent_bills %}
+                                <tr>
+                                    <td>{{ bill.billing_period|date:"F Y" }}</td>
+                                    <td>KES {{ bill.amount|floatformat:2 }}</td>
+                                    <td>
+                                        <span class="badge {% if bill.status == 'paid' %}bg-success{% elif bill.status == 'pending' %}bg-warning{% else %}bg-danger{% endif %}">
+                                            {{ bill.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'billing:bill_detail' bill.id %}" class="btn btn-sm btn-primary">View</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-center text-muted my-5">No bills found.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-6 col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Payment History</h6>
+                </div>
+                <div class="card-body">
+                    {% if recent_payments %}
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Amount</th>
+                                    <th>Reference</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for payment in recent_payments %}
+                                <tr>
+                                    <td>{{ payment.payment_date|date:"d M Y" }}</td>
+                                    <td>KES {{ payment.amount|floatformat:2 }}</td>
+                                    <td>{{ payment.reference_number }}</td>
+                                    <td>
+                                        <a href="{% url 'payments:payment_detail' payment.id %}" class="btn btn-sm btn-primary">View</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-center text-muted my-5">No payment history found.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 </div>
+
+<!-- Font Awesome for icons -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
 {% endblock %}

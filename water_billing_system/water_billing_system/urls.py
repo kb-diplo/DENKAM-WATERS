@@ -19,9 +19,11 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from water_billing_system.views import custom_permission_denied_view, custom_page_not_found_view, custom_error_view
+from . import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', views.dashboard, name='dashboard'),
     path('', include('accounts.urls', namespace='accounts')),  # This will handle the root URL through accounts.urls
     path('customers/', include('customers.urls', namespace='customers')),
     path('meter-readings/', include('meter_readings.urls', namespace='meter_readings')),
