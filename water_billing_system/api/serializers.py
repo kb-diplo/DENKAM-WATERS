@@ -3,7 +3,7 @@ from accounts.models import User
 from customers.models import Customer, Meter
 from meter_readings.models import MeterReading
 from billing.models import Bill, Tariff
-from payments.models import Payment
+from payments.models import Payment, Receipt
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -40,4 +40,11 @@ class BillSerializer(serializers.ModelSerializer):
 class PaymentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Payment
+        fields = '__all__'
+
+class ReceiptSerializer(serializers.ModelSerializer):
+    payment = PaymentSerializer(read_only=True)
+    
+    class Meta:
+        model = Receipt
         fields = '__all__'

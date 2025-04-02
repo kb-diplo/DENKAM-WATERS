@@ -3,11 +3,11 @@ from accounts.models import User
 from customers.models import Customer, Meter
 from meter_readings.models import MeterReading
 from billing.models import Bill, Tariff
-from payments.models import Payment
+from payments.models import Payment, Receipt
 from .serializers import (
     UserSerializer, CustomerSerializer, MeterSerializer,
     MeterReadingSerializer, BillSerializer, TariffSerializer,
-    PaymentSerializer
+    PaymentSerializer, ReceiptSerializer
 )
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -43,4 +43,9 @@ class TariffViewSet(viewsets.ModelViewSet):
 class PaymentViewSet(viewsets.ModelViewSet):
     queryset = Payment.objects.all()
     serializer_class = PaymentSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+class ReceiptViewSet(viewsets.ModelViewSet):
+    queryset = Receipt.objects.all()
+    serializer_class = ReceiptSerializer
     permission_classes = [permissions.IsAuthenticated]
