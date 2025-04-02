@@ -1,161 +1,17 @@
 {% extends "admin/base.html" %}
 {% load static %}
 
-{% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+{% block title %}{{ title }} | {{ site_title|default:_('Water Billing System') }}{% endblock %}
 
 {% block extrastyle %}
-<style>
-    :root {
-        --primary: #2c3e50;
-        --secondary: #34495e;
-        --accent: #3498db;
-        --primary-fg: #fff;
-        --body-fg: #333;
-        --body-bg: #f4f6f8;
-        --body-quiet-color: #666;
-        --body-loud-color: #000;
-        --header-color: #fff;
-        --header-branding-color: var(--accent);
-        --breadcrumbs-fg: #666;
-        --breadcrumbs-link-fg: var(--accent);
-        --link-fg: var(--accent);
-        --link-hover-color: #2980b9;
-        --link-selected-fg: #fff;
-        --hairline-color: #e5e5e5;
-        --border-color: #e5e5e5;
-        --error-fg: #e74c3c;
-        --message-success-bg: #2ecc71;
-        --message-warning-bg: #f1c40f;
-        --message-error-bg: #e74c3c;
-        --darkened-bg: #f8f9fa;
-        --selected-row: #ecf0f1;
-        --button-fg: #fff;
-        --button-bg: var(--accent);
-        --button-hover-bg: var(--link-hover-color);
-        --default-button-bg: #95a5a6;
-        --default-button-hover-bg: #7f8c8d;
-        --close-button-bg: #95a5a6;
-        --close-button-hover-bg: #7f8c8d;
-        --delete-button-bg: #e74c3c;
-        --delete-button-hover-bg: #c0392b;
-        --object-tools-fg: #666;
-        --object-tools-bg: var(--darkened-bg);
-        --object-tools-hover-bg: var(--hairline-color);
-    }
-
-    #header {
-        background: var(--primary);
-        color: var(--header-color);
-    }
-
-    #branding h1 {
-        color: var(--header-branding-color);
-    }
-
-    .module h2, .module caption, .inline-group h2 {
-        background: var(--secondary);
-        color: var(--header-color);
-    }
-
-    div.breadcrumbs {
-        background: var(--secondary);
-        color: var(--breadcrumbs-fg);
-    }
-
-    .button, input[type=submit], input[type=button], .submit-row input, a.button {
-        background: var(--button-bg);
-        color: var(--button-fg);
-    }
-
-    .button:hover, input[type=submit]:hover, input[type=button]:hover {
-        background: var(--button-hover-bg);
-    }
-
-    .button.default, input[type=submit].default, .submit-row input, a.button.default {
-        background: var(--default-button-bg);
-    }
-
-    .button.default:hover, input[type=submit].default:hover {
-        background: var(--default-button-hover-bg);
-    }
-
-    .button.delete, input[type=submit].delete {
-        background: var(--delete-button-bg);
-    }
-
-    .button.delete:hover, input[type=submit].delete:hover {
-        background: var(--delete-button-hover-bg);
-    }
-
-    .module {
-        border: 1px solid var(--border-color);
-        border-radius: 4px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-
-    .dashboard .module table th {
-        background: var(--darkened-bg);
-    }
-
-    .dashboard .module table td {
-        padding: 8px 12px;
-    }
-
-    .dashboard .module table tr:hover {
-        background: var(--selected-row);
-    }
-
-    #content-related .module {
-        background: var(--darkened-bg);
-    }
-
-    .object-tools a:link, .object-tools a:visited {
-        background: var(--object-tools-bg);
-        color: var(--object-tools-fg);
-    }
-
-    .object-tools a:hover {
-        background: var(--object-tools-hover-bg);
-    }
-
-    .login #container {
-        border: 1px solid var(--border-color);
-        border-radius: 4px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    .login .form-row {
-        padding: 8px 0;
-    }
-
-    .login .form-row label {
-        display: block;
-        padding: 4px 0;
-    }
-
-    .login .form-row input {
-        padding: 8px;
-        width: 100%;
-        border: 1px solid var(--border-color);
-        border-radius: 4px;
-    }
-
-    .login .submit-row {
-        padding: 16px 0;
-    }
-
-    .login .submit-row input {
-        width: 100%;
-        padding: 12px;
-        font-size: 16px;
-    }
-</style>
+{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{% static 'admin/css/custom_admin.css' %}">
 {% endblock %}
 
 {% block branding %}
 <h1 id="site-name">
     <a href="{% url 'admin:index' %}">
-        {{ site_header|default:_('Django administration') }}
+        Water Billing System
     </a>
 </h1>
 {% endblock %}
