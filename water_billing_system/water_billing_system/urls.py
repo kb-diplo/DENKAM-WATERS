@@ -27,12 +27,15 @@ admin.site.site_title = 'Denkam Waters Admin Portal'
 admin.site.index_title = 'Welcome to Denkam Waters Management Portal'
 
 urlpatterns = [
+    path('', RedirectView.as_view(url='/admin/', permanent=False)),  # Redirect root to admin
     path('admin/', admin_site.urls),
-    path('', RedirectView.as_view(url='admin/', permanent=False)),
+    path('accounts/', include('accounts.urls')),
+    path('billing/', include('billing.urls')),
     path('customers/', include('customers.urls')),
-    path('meter_readings/', include('meter_readings.urls')),
-    path('bills/', include('billing.urls')),
+    path('meter-readings/', include('meter_readings.urls')),
     path('payments/', include('payments.urls')),
+    path('reports/', include('reports.urls')),
+    path('api/', include('api.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:

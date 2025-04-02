@@ -1,18 +1,16 @@
 from django.urls import path
-from .views import (
-    ReportListView,
-    SalesReportView,
-    PaymentsReportView,
-    BalancesReportView,
-    generate_report_pdf
-)
+from . import views
 
 app_name = 'reports'
 
 urlpatterns = [
-    path('', ReportListView.as_view(), name='report_list'),
-    path('sales/', SalesReportView.as_view(), name='sales_report'),
-    path('payments/', PaymentsReportView.as_view(), name='payments_report'),
-    path('balances/', BalancesReportView.as_view(), name='balances_report'),
-    path('<int:pk>/pdf/', generate_report_pdf, name='generate_report_pdf'),
+    path('', views.report_list, name='report_list'),
+    path('billing/', views.billing_report, name='billing_report'),
+    path('billing/pdf/', views.billing_report_pdf, name='billing_report_pdf'),
+    path('payments/', views.payments_report, name='payments_report'),
+    path('payments/pdf/', views.payments_report_pdf, name='payments_report_pdf'),
+    path('consumption/', views.consumption_report, name='consumption_report'),
+    path('consumption/pdf/', views.consumption_report_pdf, name='consumption_report_pdf'),
+    path('customers/', views.customers_report, name='customers_report'),
+    path('customers/pdf/', views.customers_report_pdf, name='customers_report_pdf'),
 ]
