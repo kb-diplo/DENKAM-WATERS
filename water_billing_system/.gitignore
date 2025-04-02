@@ -1,0 +1,39 @@
+# Django
+*.log
+*.pot
+*.pyc
+__pycache__/
+local_settings.py
+db.sqlite3
+media/
+.env
+.envrc
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Virtual environment
+venv/
+venv*/
+ENV/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Database migrations (except initial)
+*/migrations/*.py
+!*/migrations/__init__.py
+
+# Static files
+staticfiles/
+*.css.map
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
