@@ -37,12 +37,16 @@ A comprehensive water billing system with manual meter reading and customer port
 1. Clone the repository:
    ```bash
    git clone https://github.com/kb-diplo/DENKAM-WATERS.git
+   ```
+   ```bash
    cd denkam-waters/water_billing_system
    ```
 
 2. Create and activate virtual environment:
    ```bash
    python -m venv venv
+   ```
+   ```bash
    venv\Scripts\activate
    ```
 
