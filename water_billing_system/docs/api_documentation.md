@@ -68,15 +68,25 @@ Content-Type: application/json
     "first_name": "John",
     "last_name": "Doe",
     "username": "johndoe",
-    "phone": "1234567890",
-    "address": "123 Main St",
     "name": "John Doe's Business",
-    "contact": "business@example.com",
+    "address": "123 Main St",
+    "contact": "1234567890",
     "meter_id": "CUSTOM123"
 }
 ```
 
-
+Response:
+```json
+{
+    "id": 1,
+    "name": "John Doe's Business",
+    "address": "123 Main St",
+    "contact": "1234567890",
+    "meter_id": "CUSTOM123",
+    "created_at": "2024-03-20T10:00:00Z",
+    "updated_at": "2024-03-20T10:00:00Z"
+}
+```
 
 ### Create Meter
 ```http
@@ -86,13 +96,24 @@ Content-Type: application/json
 
 {
     "customer": 1,
-    "meter_number": "MTR001",
-    "initial_reading": 0,
-    "installation_date": "2024-03-20"
+    "installation_date": "2024-03-20",
+    "last_reading": 0.00,
+    "is_active": true
 }
 ```
 
-
+Response:
+```json
+{
+    "id": 1,
+    "customer": 1,
+    "installation_date": "2024-03-20",
+    "last_reading": 0.00,
+    "is_active": true,
+    "created_at": "2024-03-20T10:00:00Z",
+    "updated_at": "2024-03-20T10:00:00Z"
+}
+```
 
 ### Submit Meter Reading
 ```http
@@ -102,12 +123,23 @@ Content-Type: application/json
 
 {
     "customer": 1,
-    "meter": 1,  
+    "meter": 1,
     "reading_value": 1500,
     "reading_date": "2024-04-01"
 }
 ```
 
+Response:
+```json
+{
+    "id": 1,
+    "customer": 1,
+    "meter": 1,
+    "reading_value": 1500,
+    "reading_date": "2024-04-01",
+    "created_at": "2024-04-01T10:00:00Z"
+}
+```
 
 ### Generate Bill
 ```http
@@ -117,8 +149,8 @@ Content-Type: application/json
 
 {
     "customer": 1,
-    "period_start": "2024-03-01",
-    "period_end": "2024-03-31",
+    "billing_period": "2024-03-01",
+    "current_reading": 1500,
     "rate_per_unit": 2.50
 }
 ```
@@ -128,10 +160,15 @@ Response:
 {
     "id": 1,
     "customer": 1,
-    "billing_period": "2024-03",
-    "amount": 376.25,
-    "status": "unpaid",
-    "due_date": "2024-04-15"
+    "bill_number": "BILL-20240320-0001",
+    "billing_period": "2024-03-01",
+    "previous_reading": 1000,
+    "current_reading": 1500,
+    "rate_per_unit": 2.50,
+    "amount": 1250.00,
+    "status": "pending",
+    "created_at": "2024-03-20T10:00:00Z",
+    "updated_at": "2024-03-20T10:00:00Z"
 }
 ```
 
@@ -142,10 +179,12 @@ Authorization: Token your_auth_token_here
 Content-Type: application/json
 
 {
+    "customer": 1,
     "bill": 1,
-    "amount": 376.25,
-    "payment_method": "bank_transfer",
-    "payment_date": "2024-03-20"
+    "amount_paid": 1250.00,
+    "payment_method": "bank",
+    "transaction_id": "TRX123456",
+    "notes": "Payment received via bank transfer"
 }
 ```
 
@@ -153,11 +192,17 @@ Response:
 ```json
 {
     "id": 1,
+    "customer": 1,
     "bill": 1,
-    "amount": 376.25,
-    "payment_date": "2024-03-20",
-    "payment_method": "bank_transfer",
-    "status": "completed"
+    "amount_paid": 1250.00,
+    "payment_date": "2024-03-20T10:00:00Z",
+    "payment_method": "bank",
+    "payment_method_display": "Bank Transfer",
+    "transaction_id": "TRX123456",
+    "received_by": 1,
+    "notes": "Payment received via bank transfer",
+    "created_at": "2024-03-20T10:00:00Z",
+    "updated_at": "2024-03-20T10:00:00Z"
 }
 ```
 
