@@ -1,5 +1,5 @@
 # Core Django Framework
-Django>=5.1.6
+Django==4.2.7
 
 # Form Styling and UI Components
 django-crispy-forms>=2.1  # For better form rendering
@@ -7,9 +7,9 @@ crispy-bootstrap5>=2023.10  # Bootstrap 5 template pack for crispy-forms
 django-tables2==2.7.0  # For rendering data tables
 
 # API and Documentation
-djangorestframework>=3.14.0  # For REST API functionality
-django-cors-headers>=4.3.1  # For handling CORS in API requests
-django-filter>=23.5  # For filtering querysets in views
+djangorestframework==3.14.0  # For REST API functionality
+django-cors-headers==4.3.0  # For handling CORS in API requests
+django-filter==23.5  # For filtering querysets in views
 coreapi>=2.3.3  # For API documentation
 markdown>=3.5.1  # For API documentation
 
@@ -19,7 +19,26 @@ reportlab==4.3.1  # Required by xhtml2pdf for PDF generation
 pypdf==5.4.0  # Required by xhtml2pdf for PDF manipulation
 
 # Image Processing
-pillow>=10.0.0  
+pillow==10.1.0  
 
 # Environment and Configuration
-python-dotenv>=1.0.0  # loading environment variables from .env file
+python-dotenv==1.0.0  # loading environment variables from .env file
+
+# Testing
+pytest==7.4.3
+pytest-django==4.7.0
+pytest-cov==4.1.0
+coverage==7.3.2
+factory-boy==3.3.0
+
+# Documentation
+mkdocs==1.5.3
+mkdocs-material==9.4.6
+
+# Error tracking
+sentry-sdk==1.39.1
+
+# Additional dependencies
+gunicorn==21.2.0
+whitenoise==6.6.0
+drf-yasg==1.21.7
