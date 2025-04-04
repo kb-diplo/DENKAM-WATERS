@@ -2,35 +2,32 @@
 
 ## Authentication
 
-### Register
+### Register a New Customer
 ```http
-POST /api/accounts/register/
+POST /api/customers/
 Content-Type: application/json
 
 {
-    "email": "new_user@example.com",
-    "password": "secure_password123",
-    "password2": "secure_password123",
+    "email": "customer@example.com",
+    "password": "securepassword123",
     "first_name": "John",
     "last_name": "Doe",
-    "phone": "+1234567890",
+    "username": "johndoe",
+    "phone": "1234567890",
     "address": "123 Main St",
-    "role": "customer"
+    "name": "John Doe's Business",
+    "contact": "business@example.com",
+    "meter_id": "CUSTOM123"
 }
 ```
 
-Response (201 Created):
+Response:
 ```json
 {
-    "user": {
-        "email": "new_user@example.com",
-        "first_name": "John",
-        "last_name": "Doe",
-        "phone": "+1234567890",
-        "address": "123 Main St",
-        "role": "customer"
-    },
-    "token": "your_auth_token"
+    "id": 1,
+    "name": "John Doe's Business",
+    "email": "customer@example.com",
+    "message": "Customer registered successfully"
 }
 ```
 
@@ -40,127 +37,117 @@ POST /api/accounts/login/
 Content-Type: application/json
 
 {
-    "email": "user@example.com",
-    "password": "secure_password123"
+    "username": "johndoe",
+    "password": "securepassword123"
 }
-```
-
-Response (200 OK):
-```json
-{
-    "user": {
-        "email": "user@example.com",
-        "first_name": "John",
-        "last_name": "Doe",
-        "phone": "+1234567890",
-        "address": "123 Main St",
-        "role": "customer"
-    },
-    "token": "your_auth_token"
-}
-```
-
-### Logout
-```http
-POST /api/accounts/logout/
-Authorization: Token your_auth_token
-```
-
-Response (204 No Content)
-
-## Customers
-
-### List Customers
-```http
-GET /api/customers/
-Authorization: Token your_auth_token
 ```
 
 Response:
 ```json
 {
-    "count": 2,
-    "next": null,
-    "previous": null,
-    "results": [
-        {
-            "id": 1,
-            "email": "customer1@example.com",
-            "first_name": "John",
-            "last_name": "Doe",
-            "phone_number": "+1234567890",
-            "address": "123 Main St"
-        }
-    ]
+    "token": "your_auth_token_here"
 }
 ```
 
-### Create Customer
-```http
-POST /api/customers/
-Authorization: Token your_auth_token
-Content-Type: application/json
+## Customer Management
 
+### Get Customer Details
+```http
+GET /api/customers/
+Authorization: Token your_auth_token_here
+```
+
+Response:
+```json
 {
-    "email": "new_customer@example.com",
-    "first_name": "Jane",
-    "last_name": "Smith",
-    "phone_number": "+1234567890",
-    "address": "456 Oak Ave"
+    "id": 1,
+    "name": "John Doe's Business",
+    "address": "123 Main St",
+    "contact": "business@example.com",
+    "meter_id": "CUSTOM123",
+    "created_at": "2024-03-20T10:00:00Z",
+    "updated_at": "2024-03-20T10:00:00Z"
 }
 ```
 
-## Meter Readings
-
-### Submit Reading
+### Get Customer Bills
 ```http
-POST /api/meter-readings/
-Authorization: Token your_auth_token
-Content-Type: application/json
-
-{
-    "customer": 1,
-    "reading": 1500,
-    "reading_date": "2024-04-01"
-}
+GET /api/customers/{customer_id}/bills/
+Authorization: Token your_auth_token_here
 ```
 
-## Bills
-
-### List Bills
-```http
-GET /api/bills/
-Authorization: Token your_auth_token
+Response:
+```json
+[
+    {
+        "id": 1,
+        "customer": 1,
+        "billing_period": "2024-03",
+        "amount": 150.00,
+        "status": "unpaid",
+        "due_date": "2024-04-15"
+    }
+]
 ```
 
-### Generate Bill
+### Get Customer Payments
 ```http
-POST /api/bills/
-Authorization: Token your_auth_token
-Content-Type: application/json
-
-{
-    "customer": 1,
-    "period_start": "2024-03-01",
-    "period_end": "2024-03-31"
-}
+GET /api/customers/{customer_id}/payments/
+Authorization: Token your_auth_token_here
 ```
 
-## Payments
-
-### Record Payment
-```http
-POST /api/payments/
-Authorization: Token your_auth_token
-Content-Type: application/json
-
-{
-    "bill": 1,
-    "amount": 150.00,
-    "payment_method": "CASH",
-    "payment_date": "2024-04-01"
-}
+Response:
+```json
+[
+    {
+        "id": 1,
+        "customer": 1,
+        "amount": 150.00,
+        "payment_date": "2024-03-20",
+        "payment_method": "bank_transfer"
+    }
+]
 ```
+
+### Get Customer Meter Readings
+```http
+GET /api/customers/{customer_id}/meter_readings/
+Authorization: Token your_auth_token_here
+```
+
+Response:
+```json
+[
+    {
+        "id": 1,
+        "customer": 1,
+        "reading_date": "2024-03-20",
+        "reading_value": 100.50,
+        "consumption": 20.50
+    }
+]
+```
+
+## Testing Steps
+
+1. Register a new customer:
+   - Use the registration endpoint to create a new customer account
+   - Save the response for the customer ID
+
+2. Login:
+   - Use the login endpoint to get an authentication token
+   - Save the token for subsequent requests
+
+3. Test Customer Management:
+   - Get customer details using the saved token
+   - Verify the returned information matches the registration data
+
+4. Test Related Features:
+   - Get customer bills
+   - Get customer payments
+   - Get customer meter readings
+
+Note: All endpoints except registration require authentication using the token received from the login endpoint.
 
 ## Error Responses
 
