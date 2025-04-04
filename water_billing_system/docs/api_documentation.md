@@ -117,25 +117,17 @@ Content-Type: application/json
    - Use the register endpoint to create a new user account
    - Save the user details and token
 
-3. Create a Customer:
-   - Use the customer creation endpoint
-   - Save the customer ID
-
-4. Create a Meter:
+3. Create a Meter:
    - Use the meter creation endpoint
    - Save the meter ID
 
-5. Submit a Meter Reading:
+4. Submit a Meter Reading:
    - Use the meter reading endpoint
    - Save the reading ID
 
-6. Generate a Bill:
+5. Generate a Bill:
    - Use the bill generation endpoint
    - Save the bill ID
-
-7. Record a Payment:
-   - Use the payment recording endpoint
-   - Verify the payment status
 
 Note: All endpoints require authentication using the token received from the token endpoint.
 
