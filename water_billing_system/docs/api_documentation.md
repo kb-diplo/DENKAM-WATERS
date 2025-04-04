@@ -2,43 +2,71 @@
 
 ## Authentication
 
-### Login
-```http
-POST /api/auth/login/
-Content-Type: application/json
-
-{
-    "username": "customer@example.com",
-    "password": "your_password"
-}
-```
-
-Response:
-```json
-{
-    "token": "your_auth_token",
-    "user": {
-        "id": 1,
-        "email": "customer@example.com",
-        "first_name": "John",
-        "last_name": "Doe"
-    }
-}
-```
-
 ### Register
 ```http
-POST /api/auth/register/
+POST /api/accounts/register/
 Content-Type: application/json
 
 {
-    "email": "new_customer@example.com",
-    "password": "secure_password",
-    "first_name": "Jane",
-    "last_name": "Smith",
-    "phone_number": "+1234567890"
+    "email": "new_user@example.com",
+    "password": "secure_password123",
+    "password2": "secure_password123",
+    "first_name": "John",
+    "last_name": "Doe",
+    "phone": "+1234567890",
+    "address": "123 Main St",
+    "role": "customer"
 }
 ```
+
+Response (201 Created):
+```json
+{
+    "user": {
+        "email": "new_user@example.com",
+        "first_name": "John",
+        "last_name": "Doe",
+        "phone": "+1234567890",
+        "address": "123 Main St",
+        "role": "customer"
+    },
+    "token": "your_auth_token"
+}
+```
+
+### Login
+```http
+POST /api/accounts/login/
+Content-Type: application/json
+
+{
+    "email": "user@example.com",
+    "password": "secure_password123"
+}
+```
+
+Response (200 OK):
+```json
+{
+    "user": {
+        "email": "user@example.com",
+        "first_name": "John",
+        "last_name": "Doe",
+        "phone": "+1234567890",
+        "address": "123 Main St",
+        "role": "customer"
+    },
+    "token": "your_auth_token"
+}
+```
+
+### Logout
+```http
+POST /api/accounts/logout/
+Authorization: Token your_auth_token
+```
+
+Response (204 No Content)
 
 ## Customers
 
