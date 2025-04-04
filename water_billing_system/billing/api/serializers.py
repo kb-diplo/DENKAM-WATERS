@@ -6,6 +6,7 @@ from customers.models import Customer
 class BillSerializer(serializers.ModelSerializer):
     customer_name = serializers.SerializerMethodField()
     status_display = serializers.SerializerMethodField()
+    previous_reading = serializers.DecimalField(max_digits=10, decimal_places=2, required=False)
 
     class Meta:
         model = Bill
@@ -31,8 +32,9 @@ class BillSerializer(serializers.ModelSerializer):
         if not last_reading:
             raise serializers.ValidationError("No previous meter reading found for this customer")
         
-        # Set the previous reading to the last reading
-        validated_data['previous_reading'] = last_reading.reading_value
+        # Set the previous reading to the last reading if not provided
+        if 'previous_reading' not in validated_data:
+            validated_data['previous_reading'] = last_reading.reading_value
         
         # Create the bill
         bill = Bill.objects.create(**validated_data)
