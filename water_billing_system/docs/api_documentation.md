@@ -151,6 +151,7 @@ Content-Type: application/json
     "customer": 1,
     "billing_period": "2024-03-01",
     "current_reading": 1500,
+    "previous_reading":1390,
     "rate_per_unit": 2.50
 }
 ```
