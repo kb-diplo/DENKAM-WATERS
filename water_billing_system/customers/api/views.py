@@ -1,9 +1,26 @@
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view, permission_classes
 from django.shortcuts import get_object_or_404
 from customers.models import Customer
 from .serializers import CustomerSerializer
+
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])
+def register_customer(request):
+    """
+    Register a new customer.
+    """
+    serializer = CustomerSerializer(data=request.data)
+    if serializer.is_valid():
+        customer = serializer.save()
+        return Response({
+            'id': customer.id,
+            'name': customer.name,
+            'email': customer.user.email,
+            'message': 'Customer registered successfully'
+        }, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class CustomerViewSet(viewsets.ModelViewSet):
     """
@@ -12,6 +29,14 @@ class CustomerViewSet(viewsets.ModelViewSet):
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_permissions(self):
+        """
+        Override to allow unauthenticated access for customer registration.
+        """
+        if self.action == 'create':
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated()]
 
     def get_queryset(self):
         """
@@ -50,7 +75,7 @@ class CustomerViewSet(viewsets.ModelViewSet):
         Get all meter readings for a specific customer.
         """
         customer = self.get_object()
-        readings = customer.meterreading_set.all().order_by('-reading_date')
+        readings = customer.meter_readings.all().order_by('-reading_date')
         from meter_readings.api.serializers import MeterReadingSerializer
         serializer = MeterReadingSerializer(readings, many=True)
         return Response(serializer.data) 

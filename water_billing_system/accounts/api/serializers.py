@@ -10,8 +10,9 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('email', 'password', 'password2', 'first_name', 'last_name', 'phone', 'address', 'role')
+        fields = ('username', 'email', 'password', 'password2', 'first_name', 'last_name', 'phone', 'address', 'role')
         extra_kwargs = {
+            'username': {'required': True},
             'first_name': {'required': True},
             'last_name': {'required': True},
             'email': {'required': True}
@@ -28,5 +29,5 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 class LoginSerializer(serializers.Serializer):
-    email = serializers.EmailField(required=True)
+    username = serializers.CharField(required=True)
     password = serializers.CharField(required=True, write_only=True) 
