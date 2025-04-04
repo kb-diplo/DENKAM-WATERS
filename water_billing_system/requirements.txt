@@ -19,7 +19,7 @@ reportlab==4.3.1  # Required by xhtml2pdf for PDF generation
 pypdf==5.4.0  # Required by xhtml2pdf for PDF manipulation
 
 # Image Processing
-pillow==10.1.0  
+pillow==11.1.0  
 
 # Environment and Configuration
 python-dotenv==1.0.0  # loading environment variables from .env file

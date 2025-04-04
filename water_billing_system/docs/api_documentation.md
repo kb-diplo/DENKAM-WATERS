@@ -123,22 +123,7 @@ Content-Type: application/json
 ```
 
 
-### Record Payment
-```http
-POST /api/payments/
-Authorization: Token your_auth_token_here
-Content-Type: application/json
 
-{
-    "customer": 1,
-    "bill": 1,
-    "amount_paid": 1250.00,
-    "payment_method": "bank",
-    "payment_date": "2024-03-01",
-    "transaction_id": "TRX123456",
-    "notes": "Payment received via bank transfer"
-}
-```
 
 
 
