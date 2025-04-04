@@ -56,26 +56,6 @@ Response:
 
 ## Customer Management
 
-### Create Customer
-```http
-POST /api/customers/
-Authorization: Token your_auth_token_here
-Content-Type: application/json
-
-{
-    "email": "customer@example.com",
-    "password": "securepassword123",
-    "first_name": "John",
-    "last_name": "Doe",
-    "username": "johndoe",
-    "name": "John Doe's Business",
-    "address": "123 Main St",
-    "contact": "1234567890",
-    "meter_id": "CUSTOM123"
-}
-```
-
-
 ### Create Meter
 ```http
 POST /api/meters/
