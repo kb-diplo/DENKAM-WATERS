@@ -107,65 +107,7 @@ denkam-waters/
 └── templates/         # HTML templates
 ```
 
-## Running Tests
-```bash
-python manage.py test
-```
 
-## Deployment
-
-### Heroku Deployment
-1. Install Heroku CLI and login:
-   ```bash
-   npm install -g heroku
-   heroku login
-   ```
-
-2. Create a Heroku app:
-   ```bash
-   heroku create water_billing_system
-   ```
-
-3. Add PostgreSQL add-on:
-   ```bash
-   heroku addons:create heroku-postgresql:hobby-dev
-   ```
-
-4. Configure environment variables:
-   ```bash
-   heroku config:set DEBUG=False SECRET_KEY=your_secret_key
-   ```
-
-5. Add a Procfile to your project root:
-   ```
-   web: gunicorn your_project_name.wsgi --log-file -
-   ```
-
-6. Install additional dependencies:
-   ```bash
-   pip install gunicorn dj-database-url psycopg2-binary
-   pip freeze > requirements.txt
-   ```
-
-7. Deploy to Heroku:
-   ```bash
-   git push heroku main
-   ```
-
-8. Run migrations on Heroku:
-   ```bash
-   heroku run python manage.py migrate
-   ```
-
-9. Create a superuser on Heroku:
-   ```bash
-   heroku run python manage.py createsuperuser
-   ```
-
-### Docker
-```bash
-docker-compose up -d --build
-```
 
 ## License
 MIT License
