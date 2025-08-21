@@ -119,19 +119,17 @@ TEMPLATES = [
 WSGI_APPLICATION = 'core.wsgi.application'
 
 
-# Database configuration with timezone support
+# Database configuration
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME', 'denkam_waters'),
-        'USER': os.getenv('DB_USER', 'postgres'),
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.getenv('DB_NAME', 'kbdiploo$denkam_waters'),
+        'USER': os.getenv('DB_USER', 'kbdiploo'),
         'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST', 'localhost'),
-        'PORT': os.getenv('DB_PORT', '5432'),
-        'CONN_MAX_AGE': 60,  # Reuse connections for 60 seconds
-        'ATOMIC_REQUESTS': True,  # Wrap each request in a transaction
+        'HOST': os.getenv('DB_HOST', 'kbdiploo.mysql.pythonanywhere-services.com'),
+        'PORT': os.getenv('DB_PORT', '3306'),
         'OPTIONS': {
-            'options': '-c timezone=utc',
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
         },
     }
 }
