@@ -5,6 +5,7 @@ django-bootstrap-modal-forms
 django-cors-headers
 django-phonenumber-field
 django-storages
+django-widget-tweaks
 dropbox
 gunicorn
 psycopg2-binary>=2.9.9
@@ -15,3 +16,5 @@ Pillow
 qrcode
 requests
 setuptools
+django-crispy-forms
+django-extensions
