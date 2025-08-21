@@ -28,12 +28,16 @@ from django.utils import timezone
 from collections import defaultdict
 import io
 from django.http import FileResponse
-from reportlab.pdfgen import canvas
-from reportlab.lib.units import inch
-from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.lib import colors
+try:
+    from reportlab.pdfgen import canvas
+    from reportlab.lib.units import inch
+    from reportlab.lib.pagesizes import letter
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
+    from reportlab.lib.styles import getSampleStyleSheet
+    from reportlab.lib import colors
+    REPORTLAB_AVAILABLE = True
+except ImportError:
+    REPORTLAB_AVAILABLE = False
 
 
 def landingpage(request):
@@ -1270,6 +1274,9 @@ def record_meter_reading(request):
 def reports(request):
     # Handle PDF export
     if request.GET.get('export') == 'pdf':
+        if not REPORTLAB_AVAILABLE:
+            return JsonResponse({'error': 'PDF generation not available'}, status=500)
+        
         from django.http import HttpResponse
         from reportlab.pdfgen import canvas
         from reportlab.lib.pagesizes import letter, A4

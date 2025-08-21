@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from os import getenv
 from dotenv import load_dotenv
-import django.db.backends.postgresql
+# import django.db.backends.postgresql  # Not needed for MySQL
 
 # Load environment variables from .env.local if it exists, otherwise from .env
 if os.path.exists('.env.local'):
