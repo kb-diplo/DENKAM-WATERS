@@ -326,7 +326,7 @@ class MeterReaderRegistrationForm(forms.ModelForm):
         min_length=8,
         validators=[
             validators.RegexValidator(
-                regex='^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$',
+                regex=r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$',
                 message='Password must contain at least one letter, one number, and one special character.',
                 code='invalid_password'
             ),

@@ -8,7 +8,7 @@ django-storages
 django-widget-tweaks
 dropbox
 gunicorn
-psycopg2-binary>=2.9.9
+mysqlclient
 python-dotenv==0.21.0
 sweetify
 whitenoise==6.2.0
@@ -18,3 +18,4 @@ requests
 setuptools
 django-crispy-forms
 django-extensions
+reportlab
