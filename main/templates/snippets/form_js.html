@@ -1,0 +1,54 @@
+<!-- Form JavaScript Snippets -->
+<!-- This file contains common form-related JavaScript that can be included in other templates -->
+
+<!-- jQuery Form Validation -->
+<script>
+// Enable Bootstrap form validation
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        var forms = document.getElementsByClassName('needs-validation');
+        
+        // Loop over them and prevent submission
+        var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+</script>
+
+<!-- Toast Notification Script -->
+<script>
+// Show toast notifications if they exist
+$(document).ready(function() {
+    // Check for messages in Django's message framework
+    if ($('.toast').length > 0) {
+        $('.toast').toast('show');
+    }
+    
+    // Initialize tooltips
+    $('[data-toggle="tooltip"]').tooltip();
+    
+    // Initialize popovers
+    $('[data-toggle="popover"]').popover();
+});
+</script>
+
+<!-- Form Reset Handler -->
+<script>
+// Reset form and remove validation classes
+function resetForm(formId) {
+    const form = document.getElementById(formId);
+    if (form) {
+        form.reset();
+        form.classList.remove('was-validated');
+    }
+}
+</script>
