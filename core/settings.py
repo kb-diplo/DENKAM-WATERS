@@ -125,12 +125,14 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': os.getenv('DB_NAME', 'kbdiploo$denkam_waters'),
         'USER': os.getenv('DB_USER', 'kbdiploo'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'PASSWORD': os.getenv('DB_PASSWORD', ''),  # Provide empty string fallback
         'HOST': os.getenv('DB_HOST', 'kbdiploo.mysql.pythonanywhere-services.com'),
         'PORT': os.getenv('DB_PORT', '3306'),
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+            'charset': 'utf8mb4',
         },
+        'CONN_MAX_AGE': 0,  # Don't persist connections
     }
 }
 
