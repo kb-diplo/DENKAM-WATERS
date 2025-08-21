@@ -23,26 +23,27 @@
                                                 {% endif %}
                                             </h1>
                                         </div>
-                                        <form method="post" action="{% url 'login' %}{% if role %}?role={{ role }}{% endif %}" class="user">
+                                        <form method="post" action="{% url 'account:login' %}{% if role %}?role={{ role }}{% endif %}" class="user">
                                             {% csrf_token %}
+                                            {% if error %}
+                                            <div class="alert alert-danger">
+                                                {{ error }}
+                                            </div>
+                                            {% endif %}
                                             <div class="form-group">
-                                                <input type="email" name="email" class="form-control form-control-user" id="email" placeholder="Email">
+                                                <input type="email" name="email" class="form-control form-control-user" id="email" placeholder="Email" required>
                                             </div>
                                             <div class="form-group">
-                                                <input type="password" name="password" class="form-control form-control-user" id="password" placeholder="Password">
+                                                <input type="password" name="password" class="form-control form-control-user" id="password" placeholder="Password" required>
                                             </div>
                                             <input type="submit" value="Login" class="btn btn-primary btn-user btn-block">
                                             <hr>
-                                            {% if role != 'admin' and role != 'meter_reader' %}
                                             <div class="text-center">
-                                                <a class="small" href="{% url 'password_reset' %}">Forgot Password?</a>
+                                                <a class="small" href="{% url 'account:password_reset' %}">Forgot Password?</a>
                                             </div>
+
                                             <div class="text-center">
-                                                <a class="small" href="{% url 'register' %}">Create an Account!</a>
-                                            </div>
-                                            {% endif %}
-                                            <div class="text-center">
-                                                <a class="small" href="{% url 'landingpage' %}">Back to Homepage</a>
+                                                <a class="small" href="{% url 'account:landingpage' %}">Back to Homepage</a>
                                             </div>
                                         </form>
                                     </div>

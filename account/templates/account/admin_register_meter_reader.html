@@ -8,8 +8,8 @@
     <!-- Page Heading -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">{{ title }}</h1>
-        <a href="{% url 'main:clients' %}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-            <i class="fas fa-arrow-left fa-sm text-white-50"></i> Back to Clients
+        <a href="{% url 'main:users' %}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+            <i class="fas fa-arrow-left fa-sm text-white-50"></i> Back to Users
         </a>
     </div>
 
@@ -19,11 +19,11 @@
             <div class="card shadow mb-4">
                 <!-- Card Header -->
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary">Client Information</h6>
+                    <h6 class="m-0 font-weight-bold text-primary">Meter Reader Information</h6>
                 </div>
                 <!-- Card Body -->
                 <div class="card-body">
-                    <form method="POST" class="user" id="clientForm" novalidate>
+                    <form method="POST" class="user" id="meterReaderForm" novalidate>
                         {% csrf_token %}
                         
                         <!-- Form Errors -->
@@ -66,6 +66,19 @@
                                     {{ form.email.errors.0 }}
                                 </div>
                             {% endif %}
+                            <small class="form-text text-muted">{{ form.email.help_text }}</small>
+                        </div>
+
+                        <!-- Phone Number -->
+                        <div class="form-group">
+                            <label for="{{ form.phone_number.id_for_label }}">Phone Number <span class="text-danger">*</span></label>
+                            {{ form.phone_number }}
+                            {% if form.phone_number.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.phone_number.errors.0 }}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">{{ form.phone_number.help_text }}</small>
                         </div>
 
                         <!-- Passwords -->
@@ -91,32 +104,10 @@
                             </div>
                         </div>
 
-                        <!-- Contact Information -->
-                        <div class="form-group">
-                            <label for="{{ form.contact_number.id_for_label }}">Contact Number</label>
-                            {{ form.contact_number }}
-                            {% if form.contact_number.errors %}
-                                <div class="invalid-feedback d-block">
-                                    {{ form.contact_number.errors.0 }}
-                                </div>
-                            {% endif %}
-                        </div>
-
-                        <!-- Address -->
-                        <div class="form-group">
-                            <label for="{{ form.address.id_for_label }}">Address</label>
-                            {{ form.address }}
-                            {% if form.address.errors %}
-                                <div class="invalid-feedback d-block">
-                                    {{ form.address.errors.0 }}
-                                </div>
-                            {% endif %}
-                        </div>
-
                         <!-- Submit Button -->
                         <div class="form-group mt-4">
                             <button type="submit" class="btn btn-primary btn-user btn-block">
-                                <i class="fas fa-user-plus fa-fw"></i> Register Client
+                                <i class="fas fa-user-plus fa-fw"></i> Register Meter Reader
                             </button>
                         </div>
                     </form>

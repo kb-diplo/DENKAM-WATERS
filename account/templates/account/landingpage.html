@@ -66,23 +66,23 @@
   <!-- ======= Header ======= -->
   <header id="header" class="fixed-top">
     <div class="container d-flex align-items-center">
-      <img src="{% static 'sb_admin/img/logo.png' %}" width="45px" height="40px" style="margin-right: 2px; padding-right: 4px;" />
-      <h1 style="font-size: 20px; font-weight: bolder;" class="logo mr-auto bold"><a href="">DENKAM WATERS COMPANY LIMITED</a></h1>
+      <img src="{% static 'sb_admin/img/logo.png' %}" width="45px" height="40px" style="margin-right: 10px; padding-right: 5px;" />
+      <h1 style="font-size: 22px; font-weight: bolder; letter-spacing: 0.5px;" class="logo mr-auto bold"><a href="">DENKAM WATERS COMPANY LIMITED</a></h1>
 
       <nav class="main-nav d-none d-lg-block">
         <ul>
           <li class="active"><a href="#hero">Home</a></li>
+          <li><a href="#about">About Us</a></li>
           <li><a href="#services">Features</a></li>
           <li class="drop-down"><a href="#">Client Portal</a>
             <ul>
-              <li><a href="{% url 'login' %}">Login</a></li>
-              <li><a href="{% url 'register' %}">Register</a></li>
+              <li><a href="{% url 'account:login' %}">Login</a></li>
             </ul>
           </li>
           <li class="drop-down"><a href="#">Staff Portal</a>
             <ul>
-              <li><a href="{% url 'login' %}?role=admin">Admin Login</a></li>
-              <li><a href="{% url 'login' %}?role=meter_reader">Meter Reader Login</a></li>
+              <li><a href="{% url 'account:login' %}?role=admin">Admin Login</a></li>
+              <li><a href="{% url 'account:login' %}?role=meter_reader">Meter Reader Login</a></li>
             </ul>
           </li>
         </ul>
@@ -97,16 +97,17 @@
       <div class="row justify-content-center align-self-center" data-aos="fade-up">
         <div class="col-md-6 intro-info order-md-first order-last" data-aos="zoom-in" data-aos-delay="100">
           <h2>Water Billing<br>Management System</h2>
-          <span>This system automates calculating bills and keeping client records, allowing administrators to minimize the effort.</span>
+          <span>A comprehensive water billing system designed for efficient management of customer accounts, meter readings and billing processes. 
+            It features a supplier-side dashboard for staff and a client-facing portal for customers.</span>
           <div class="mt-4">
-            <a href="{% url 'login' %}" class="btn-get-started scrollto">Client Portal</a>
+            <a href="{% url 'account:login' %}" class="btn-get-started scrollto">Client Portal</a>
             <div class="btn-group" style="margin-left: 10px;">
               <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 Staff Portal
               </button>
               <div class="dropdown-menu">
-                <a class="dropdown-item" href="{% url 'login' %}?role=admin">Admin Login</a>
-                <a class="dropdown-item" href="{% url 'login' %}?role=meter_reader">Meter Reader Login</a>
+                <a class="dropdown-item" href="{% url 'account:login' %}?role=admin">Admin Login</a>
+                <a class="dropdown-item" href="{% url 'account:login' %}?role=meter_reader">Meter Reader Login</a>
               </div>
             </div>
           </div>
@@ -122,8 +123,55 @@
   <main id="main">
 
     <!-- ======= About Section ======= -->
-    
+    <section id="about" class="about section-bg">
+      <div class="container" data-aos="fade-up">
 
+        <header class="section-header">
+          <h3>About Denkam Waters</h3>
+          <p>Learn more about our commitment to providing quality water services to our community.</p>
+        </header>
+
+        <div class="row">
+          <div class="col-lg-12" data-aos="fade-up">
+            <h4>We are committed to providing clean, reliable water services to the Denkam community.</h4>
+            <p>
+              Denkam Waters has been serving the Kahawa Wendani estate since 2020, providing clean and reliable water to over 1,200 connections including homes and businesses. Our dedicated team works tirelessly to ensure consistent water supply and excellent customer service.
+            </p>
+          </div>
+        </div>
+
+        <div class="row mt-4">
+          <div class="col-lg-6" data-aos="fade-up">
+            <h4>Our Mission</h4>
+            <p>
+              To provide clean, safe, and reliable water services to our community while maintaining environmental sustainability and operational excellence.
+            </p>
+            <h4 class="mt-4">Our Vision</h4>
+            <p>
+              To be the leading water service provider in Kiambu County, recognized for our commitment to quality, innovation, and community service.
+            </p>
+          </div>
+
+          <div class="col-lg-6" data-aos="fade-up">
+            <h4>Contact Information</h4>
+            <p>
+              <i class="fa fa-map-marker"></i> Kahawa Wendani, Kiambu County, Kenya<br>
+              <i class="fa fa-phone"></i> +254 757 690 915<br>
+              <i class="fa fa-envelope"></i> info@denkamwaters.co.ke<br>
+            </p>
+
+            <h4 class="mt-4">Opening Hours</h4>
+            <p>
+              <i class="fa fa-clock-o"></i> Monday - Friday: 8:00 AM - 5:00 PM<br>
+              <i class="fa fa-clock-o"></i> Saturday: 9:00 AM - 1:00 PM<br>
+              <i class="fa fa-clock-o"></i> Sunday: Closed<br>
+              <i class="fa fa-clock-o"></i> Public Holidays: Closed<br>
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </section><!-- End About Section -->
 
     <!-- ======= Services Section ======= -->
     <section id="services" class="services section-bg">
@@ -153,8 +201,8 @@
           <div class="col-md-6 col-lg-4" data-aos="zoom-in" data-aos-delay="300">
             <div class="box">
               <div class="icon" style="background: #eafde7;"><i class="ion-ios-gear-outline" style="color: #41cf2e;"></i></div>
-              <h4 class="title"><a href="">Automated Billing</a></h4>
-              <p class="description">Our system automates the entire billing process, from meter reading imports to bill generation, ensuring accuracy and timeliness.</p>
+              <h4 class="title"><a href="">Billing</a></h4>
+              <p class="description">Our system allows entry of meter readings simplifying the entire billing process and ensuring accuracy and timeliness.</p>
             </div>
           </div>
 
@@ -163,6 +211,13 @@
       </div>
     </section><!-- End Services Section -->
 
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section><!-- End About Section -->
+
   </main><!-- End #main -->
 
   <!-- ======= Footer ======= -->
@@ -170,23 +225,59 @@
     <div class="footer-top">
       <div class="container">
         <div class="row">
-          <div class="col-lg-6">
-            <div class="row">
-                <div class="col-sm-6">
-                  <div class="footer-info">
-                    <h3>Denkam</h3>
-                    <p>This system automates calculating bills and keeping client records, allowing administrators to minimize the effort.</p>
-                  </div>
-                </div>
+
+          <div class="col-lg-4 col-md-6 footer-info">
+            <h3>Denkam Waters</h3>
+            <p>Providing clean, reliable water services to the Denkam community for over a decade.</p>
+            <div class="social-links mt-3">
+              <a href="#" class="twitter"><i class="fa fa-twitter"></i></a>
+              <a href="#" class="facebook"><i class="fa fa-facebook"></i></a>
+              <a href="#" class="instagram"><i class="fa fa-instagram"></i></a>
+              <a href="#" class="linkedin"><i class="fa fa-linkedin"></i></a>
             </div>
           </div>
+
+          <div class="col-lg-4 col-md-6 footer-links">
+            <h4>Our Services</h4>
+            <ul>
+              <li><i class="fa fa-angle-right"></i> Water Distribution</li>
+              <li><i class="fa fa-angle-right"></i> Billing Management</li>
+              <li><i class="fa fa-angle-right"></i> Customer Support</li>
+              <li><i class="fa fa-angle-right"></i> Infrastructure Maintenance</li>
+            </ul>
+          </div>
+
+          <div class="col-lg-4 col-md-6 footer-contact">
+            <h4>Contact Us</h4>
+            <p>
+              Denkam Waters Company Limited<br>
+              Kahawa Wendani<br>
+              Kiambu County, Kenya<br>
+              <strong>Phone:</strong> +254 757 690 915<br>
+              <strong>Email:</strong> info@denkamwaters.co.ke<br>
+            </p>
+
+            <h4>Opening Hours</h4>
+            <p>
+              Monday - Friday: 8:00 AM - 5:00 PM<br>
+              Saturday: 9:00 AM - 1:00 PM<br>
+              Sunday: Closed<br>
+              Public Holidays: Closed<br>
+            </p>
+          </div>
+
         </div>
       </div>
     </div>
 
     <div class="container">
-      <div class="copyright">
-        &copy; Copyright <strong>Denkam</strong>. All Rights Reserved
+      <div class="copyright text-center my-auto">
+        <b><span>Copyright &copy; Water Billing System 2025</span></b>
+      </div>
+      <div class="developer-info text-center my-auto mb-2">
+        <span>Developed by: Lawrence Mbugua Njuguna 2025</span> | 
+        <a href="https://github.com/kb-diplo" target="_blank">GitHub</a> | 
+        <a href="http://www.linkedin.com/in/mbugualawrence" target="_blank">LinkedIn</a>
       </div>
     </div>
   </footer><!-- End  Footer -->

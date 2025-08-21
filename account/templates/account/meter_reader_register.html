@@ -1,23 +1,147 @@
 {% extends 'main/layout.html' %}
 {% load static %}
+{% load widget_tweaks %}
+
+{% block title %}Register New Meter Reader - Denkam Water Billing{% endblock %}
 
 {% block body %}
 <div class="container">
     <div class="row justify-content-center">
-        <div class="col-xl-10 col-lg-12 col-md-9">
+        <div class="col-xl-8 col-lg-9">
             <div class="card o-hidden border-0 shadow-lg my-5" data-aos="fade-up" data-aos-duration="1000" data-aos-easing="ease-in-out">
                 <div class="card-body p-0">
                     <div class="row">
                         <div class="col-lg-12">
                             <div class="p-5">
-                                <div class="text-center">
-                                    <h1 class="h4 text-gray-900 mb-4">{{ title }}</h1>
+                                <div class="text-center mb-4">
+                                    <h1 class="h4 text-gray-900 font-weight-bold">Register New Meter Reader</h1>
+                                    <p class="text-muted">Fill in the details below to create a new meter reader account</p>
                                 </div>
-                                <form action="{% url 'meter_reader_register' %}" method="POST" class="user">
+                                
+                                {% if form.non_field_errors %}
+                                <div class="alert alert-danger" role="alert">
+                                    {% for error in form.non_field_errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+
+                                <form method="POST" class="user" novalidate>
                                     {% csrf_token %}
-                                    {{ form.as_p }}
-                                    <input type="submit" value="Register" class="btn btn-primary btn-user btn-block">
+                                    
+                                    <div class="form-group row">
+                                        <div class="col-sm-6 mb-3 mb-sm-0">
+                                            <label for="{{ form.first_name.id_for_label }}" class="small font-weight-bold">First Name</label>
+                                            {% render_field form.first_name class="form-control form-control-user" placeholder="Enter first name" %}
+                                            {% if form.first_name.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.first_name.errors.0 }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <label for="{{ form.last_name.id_for_label }}" class="small font-weight-bold">Last Name</label>
+                                            {% render_field form.last_name class="form-control form-control-user" placeholder="Enter last name" %}
+                                            {% if form.last_name.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.last_name.errors.0 }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="{{ form.email.id_for_label }}" class="small font-weight-bold">Email Address</label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                            </div>
+                                            {% render_field form.email class="form-control form-control-user" placeholder="Enter email address" %}
+                                        </div>
+                                        {% if form.email.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.email.errors.0 }}
+                                            </div>
+                                        {% else %}
+                                            <small class="form-text text-muted">{{ form.email.help_text }}</small>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="{{ form.phone_number.id_for_label }}" class="small font-weight-bold">Phone Number</label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                            </div>
+                                            {% render_field form.phone_number class="form-control form-control-user" placeholder="e.g. +254700000000" %}
+                                        </div>
+                                        {% if form.phone_number.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.phone_number.errors.0 }}
+                                            </div>
+                                        {% else %}
+                                            <small class="form-text text-muted">{{ form.phone_number.help_text }}</small>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <div class="col-sm-6 mb-3 mb-sm-0">
+                                            <label for="{{ form.password1.id_for_label }}" class="small font-weight-bold">Password</label>
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                                </div>
+                                                {% render_field form.password1 class="form-control form-control-user" %}
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-outline-secondary toggle-password" type="button" data-target="#{{ form.password1.id_for_label }}">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            {% if form.password1.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.password1.errors.0 }}
+                                                </div>
+                                            {% else %}
+                                                <small class="form-text text-muted">{{ form.password1.help_text }}</small>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <label for="{{ form.password2.id_for_label }}" class="small font-weight-bold">Confirm Password</label>
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                                </div>
+                                                {% render_field form.password2 class="form-control form-control-user" %}
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-outline-secondary toggle-password" type="button" data-target="#{{ form.password2.id_for_label }}">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            {% if form.password2.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.password2.errors.0 }}
+                                                </div>
+                                            {% else %}
+                                                <small class="form-text text-muted">{{ form.password2.help_text }}</small>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-4">
+                                        <button type="submit" class="btn btn-primary btn-user btn-block">
+                                            <i class="fas fa-user-plus mr-2"></i> Register Meter Reader
+                                        </button>
+                                    </div>
                                 </form>
+
+                                <hr>
+                                <div class="text-center">
+                                    <a class="small" href="{% url 'admin_dashboard' %}">
+                                        <i class="fas fa-arrow-left mr-1"></i> Back to Dashboard
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -26,4 +150,32 @@
         </div>
     </div>
 </div>
-{% endblock body %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Toggle password visibility
+$(document).ready(function() {
+    $('.toggle-password').click(function() {
+        const target = $($(this).data('target'));
+        const type = target.attr('type') === 'password' ? 'text' : 'password';
+        target.attr('type', type);
+        $(this).find('i').toggleClass('fa-eye fa-eye-slash');
+    });
+
+    // Add validation classes on form submission
+    $('form').on('submit', function() {
+        $(this).addClass('was-validated');
+    });
+
+    // Real-time validation
+    $('input, select, textarea').on('input change', function() {
+        if ($(this).val()) {
+            $(this).addClass('is-valid').removeClass('is-invalid');
+        } else {
+            $(this).removeClass('is-valid is-invalid');
+        }
+    });
+});
+</script>
+{% endblock %}
