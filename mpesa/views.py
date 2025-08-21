@@ -1,11 +1,14 @@
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, render, redirect
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.utils import timezone
 import requests
 import json
 import base64
 import logging
-from datetime import datetime
+import datetime
 from django.conf import settings
 from .models import MpesaPayment
 from main.models import WaterBill
@@ -13,6 +16,7 @@ from main.models import WaterBill
 logger = logging.getLogger(__name__)
 
 def get_mpesa_access_token():
+    """Get M-Pesa OAuth access token"""
     consumer_key = settings.MPESA_CONSUMER_KEY
     consumer_secret = settings.MPESA_CONSUMER_SECRET
     api_url = f'{settings.MPESA_API_URL}/oauth/v1/generate?grant_type=client_credentials'
@@ -22,125 +26,194 @@ def get_mpesa_access_token():
         return None
 
     try:
-        response = requests.get(api_url, auth=(consumer_key, consumer_secret))
+        response = requests.get(api_url, auth=(consumer_key, consumer_secret), timeout=30)
+        response.raise_for_status()
         
-        if response.status_code == 200:
+        token_data = response.json()
+        if 'access_token' in token_data:
             logger.info("Successfully obtained M-Pesa access token.")
-            return response.json()['access_token']
+            return token_data['access_token']
         else:
-            logger.error(f"Failed to get M-Pesa access token. Status: {response.status_code}, Response: {response.text}")
+            logger.error(f"Access token not found in response: {token_data}")
             return None
+            
     except requests.exceptions.RequestException as e:
-        logger.error(f"Network error while requesting M-Pesa access token: {e}")
+        logger.error(f"Error getting M-Pesa access token: {str(e)}")
+        return None
+    except json.JSONDecodeError as e:
+        logger.error(f"Invalid JSON response when getting access token: {e}")
         return None
 
-@csrf_exempt
-def initiate_payment(request, bill_id):
+def generate_password():
+    """Generate M-Pesa API password using the passkey"""
+    timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+    password_string = f"{settings.MPESA_SHORTCODE}{settings.MPESA_PASSKEY}{timestamp}"
+    password_bytes = password_string.encode('ascii')
+    password = base64.b64encode(password_bytes).decode('utf-8')
+    return password, timestamp
+
+@login_required
+def initiate_stk_push(request, bill_id):
+    """Initiate STK push payment for a bill"""
     bill = get_object_or_404(WaterBill, id=bill_id)
     
     if request.method == 'POST':
-        phone_number_str = request.POST.get('phone_number')
-        amount_str = request.POST.get('amount')
+        phone_number = request.POST.get('phone_number', '').strip()
         
-        if not phone_number_str:
-            return JsonResponse({'error': 'Phone number is required.'}, status=400)
-        
-        if phone_number_str.startswith('+254'):
-            phone_number = phone_number_str[1:]
-        elif phone_number_str.startswith('07'):
-            phone_number = '254' + phone_number_str[1:]
-        elif phone_number_str.startswith('01'):
-            phone_number = '254' + phone_number_str[1:]
-        elif phone_number_str.startswith('254'):
-            phone_number = phone_number_str
-        else:
-            return JsonResponse({'error': 'Invalid phone number format. Use 07xxxxxxxx, 01xxxxxxxx or 254xxxxxxxx.'}, status=400)
-
-        try:
-            amount = int(float(amount_str))
-            if amount < 1:
-                return JsonResponse({'error': 'Invalid amount.'}, status=400)
-        except (ValueError, TypeError):
-            return JsonResponse({'error': 'Invalid amount provided.'}, status=400)
-
+        # Format phone number to 2547XXXXXXXX
+        if phone_number.startswith('0'):
+            phone_number = '254' + phone_number[1:]
+        elif phone_number.startswith('+254'):
+            phone_number = phone_number[1:]
+            
+        if not phone_number.isdigit() or len(phone_number) != 12:
+            messages.error(request, 'Please enter a valid phone number (e.g., 07XXXXXXXX or 2547XXXXXXXX)')
+            return redirect('main:bill_detail', bill_id=bill_id)
+            
+        # Get access token
         access_token = get_mpesa_access_token()
         if not access_token:
-            logger.error("Could not get M-Pesa access token.")
-            return JsonResponse({'error': 'Could not get access token.'}, status=500)
-
-        api_url = f'{settings.MPESA_API_URL}/mpesa/stkpush/v1/processrequest'
-        headers = {'Authorization': f'Bearer {access_token}'}
-
-        timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
-        password = base64.b64encode(f'{settings.MPESA_SHORTCODE}{settings.MPESA_PASSKEY}{timestamp}'.encode()).decode('utf-8')
-
+            messages.error(request, 'Failed to connect to payment service. Please try again later.')
+            return redirect('main:bill_detail', bill_id=bill_id)
+            
+        # Generate password and timestamp
+        password, timestamp = generate_password()
+        
+        # Prepare STK push payload
+        headers = {
+            'Authorization': f'Bearer {access_token}',
+            'Content-Type': 'application/json'
+        }
+        
         payload = {
             'BusinessShortCode': settings.MPESA_SHORTCODE,
             'Password': password,
             'Timestamp': timestamp,
             'TransactionType': 'CustomerPayBillOnline',
-            'Amount': amount,
+            'Amount': int(bill.amount),
             'PartyA': phone_number,
             'PartyB': settings.MPESA_SHORTCODE,
             'PhoneNumber': phone_number,
             'CallBackURL': settings.MPESA_CALLBACK_URL,
-            'AccountReference': f'BILL-{bill.id}',
-            'TransactionDesc': f'Payment for Water Bill {bill.id}'
+            'AccountReference': f"WATER{str(bill.id).zfill(6)}",
+            'TransactionDesc': f"Water Bill Payment - {bill.id}"
         }
-
-        logger.info(f"Initiating M-Pesa payment with payload: {payload}")
         
         try:
-            response = requests.post(api_url, json=payload, headers=headers)
+            # Send STK push request
+            response = requests.post(
+                f"{settings.MPESA_API_URL}/mpesa/stkpush/v1/processrequest",
+                headers=headers,
+                json=payload,
+                timeout=30
+            )
             response.raise_for_status()
             response_data = response.json()
-            logger.info(f"M-Pesa push response: {response_data}")
-            return JsonResponse(response_data)
+            
+            # Check if request was successful
+            if 'ResponseCode' in response_data and response_data['ResponseCode'] == '0':
+                # Create payment record
+                MpesaPayment.objects.create(
+                    bill=bill,
+                    phone_number=phone_number,
+                    amount=bill.amount,
+                    transaction_id=response_data.get('CheckoutRequestID'),
+                    is_successful=False
+                )
+                messages.success(request, 'Payment request sent successfully! Please check your phone to complete the payment.')
+            else:
+                error_message = response_data.get('errorMessage', 'Failed to initiate payment. Please try again.')
+                messages.error(request, f'Payment failed: {error_message}')
+                
         except requests.exceptions.RequestException as e:
-            logger.error(f"Error calling M-Pesa API: {e}")
-            return JsonResponse({'error': f'Failed to communicate with M-Pesa API: {str(e)}'}, status=500)
-
-    return render(request, 'mpesa/initiate_payment.html', {'bill': bill})
+            logger.error(f"Error initiating STK push: {str(e)}")
+            messages.error(request, 'Failed to connect to payment service. Please try again later.')
+        except Exception as e:
+            logger.error(f"Unexpected error: {str(e)}")
+            messages.error(request, 'An unexpected error occurred. Please try again.')
+            
+        return redirect('main:bill_detail', bill_id=bill_id)
+    
+    # If not POST, show the payment form
+    context = {
+        'bill': bill,
+        'title': 'Pay with M-Pesa'
+    }
+    return render(request, 'mpesa/initiate_payment.html', context)
 
 @csrf_exempt
 def mpesa_callback(request):
-    data = json.loads(request.body)
+    """Handle M-Pesa STK push callback"""
+    if request.method != 'POST':
+        return JsonResponse({'ResultCode': 1, 'ResultDesc': 'Method not allowed'}, status=405)
     
-    # Process the callback data
-    # Check if the transaction was successful and update the database
-    # This is a simplified example. You should add more robust error handling and security checks.
-    
-    result_code = data.get('Body', {}).get('stkCallback', {}).get('ResultCode')
-
-    if result_code == 0:
-        # Successful transaction
-        callback_metadata = data.get('Body', {}).get('stkCallback', {}).get('CallbackMetadata', {}).get('Item', [])
+    try:
+        # Log the raw request body for debugging
+        raw_body = request.body.decode('utf-8')
+        logger.info(f"Received M-Pesa callback: {raw_body}")
         
-        amount = next((item['Value'] for item in callback_metadata if item['Name'] == 'Amount'), None)
-        receipt_number = next((item['Value'] for item in callback_metadata if item['Name'] == 'MpesaReceiptNumber'), None)
-        phone_number = next((item['Value'] for item in callback_metadata if item['Name'] == 'PhoneNumber'), None)
-        account_reference = data.get('Body', {}).get('stkCallback', {}).get('CheckoutRequestID') # Or use AccountReference from initiate_payment
-
-        # Find the bill and update its status
-        # You might need a more robust way to link the callback to the initial payment request
         try:
-            # This is a simplified lookup. In a real application, you'd use the CheckoutRequestID
-            # stored during initiation to find the correct MpesaPayment record.
-            bill_id = int(account_reference.split('-')[1]) # Assuming AccountReference is 'BILL-<id>'
-            bill = WaterBill.objects.get(id=bill_id)
-            bill.status = 'Paid'
-            bill.save()
-
-            # Create a MpesaPayment record
-            MpesaPayment.objects.create(
-                bill=bill,
-                phone_number=phone_number,
-                amount=amount,
-                transaction_id=receipt_number,
-                is_successful=True
+            data = json.loads(raw_body)
+        except json.JSONDecodeError as e:
+            logger.error(f"Invalid JSON in M-Pesa callback: {e}")
+            return JsonResponse({'ResultCode': 1, 'ResultDesc': 'Invalid JSON'}, status=400)
+        
+        # Safely extract callback data with proper error handling
+        callback_data = data.get('Body', {}).get('stkCallback', {})
+        result_code = callback_data.get('ResultCode')
+        checkout_request_id = callback_data.get('CheckoutRequestID')
+        
+        if not checkout_request_id:
+            logger.error("No CheckoutRequestID in callback data")
+            return JsonResponse({'ResultCode': 1, 'ResultDesc': 'Missing CheckoutRequestID'}, status=400)
+        
+        # Try to get the payment record
+        try:
+            payment = MpesaPayment.objects.get(checkout_request_id=checkout_request_id)
+        except MpesaPayment.DoesNotExist:
+            logger.error(f"Payment with CheckoutRequestID {checkout_request_id} not found")
+            return JsonResponse({'ResultCode': 1, 'ResultDesc': 'Payment not found'}, status=404)
+        
+        # Process based on result code
+        if result_code == 0:
+            # Payment was successful
+            payment_metadata = next(
+                (item for item in callback_data.get('CallbackMetadata', {}).get('Item', []) 
+                 if item.get('Name') == 'MpesaReceiptNumber'),
+                {}
             )
-        except (WaterBill.DoesNotExist, IndexError, ValueError):
-            # Handle cases where the bill is not found or the reference is malformed
-            pass
-
-    return HttpResponse(status=200)
+            
+            receipt_number = payment_metadata.get('Value')
+            
+            # Update payment record
+            payment.is_successful = True
+            payment.status = 'completed'
+            payment.receipt_number = receipt_number
+            payment.transaction_id = receipt_number or checkout_request_id
+            payment.raw_callback_data = data
+            payment.completed_at = timezone.now()
+            payment.save()
+            
+            # Update bill status
+            bill = payment.bill
+            bill.status = 'Paid'
+            bill.payment_date = timezone.now()
+            bill.save()
+            
+            logger.info(f"Payment {checkout_request_id} marked as successful. Receipt: {receipt_number}")
+            return JsonResponse({'ResultCode': 0, 'ResultDesc': 'Request processed successfully'})
+        else:
+            # Payment failed
+            error_message = callback_data.get('ResultDesc', 'Payment failed')
+            payment.status = 'failed'
+            payment.is_successful = False
+            payment.notes = f"Payment failed: {error_message}"
+            payment.raw_callback_data = data
+            payment.save()
+            
+            logger.error(f"Payment {checkout_request_id} failed: {error_message}")
+            return JsonResponse({'ResultCode': 0, 'ResultDesc': 'Request processed successfully'})
+            
+    except Exception as e:
+        logger.error(f"Unexpected error in mpesa_callback: {str(e)}", exc_info=True)
+        return JsonResponse({'ResultCode': 1, 'ResultDesc': 'Internal server error'}, status=500)
