@@ -5,12 +5,30 @@
 __pycache__/
 local_settings.py
 db.sqlite3
+db.sqlite3-journal
 
-# Environment
+# Environment variables and sensitive data
 .env
+.env.local
+.env.production
+.env.staging
+*.env
+
+# Database backups and sensitive data
+db_backup.json
+*.sql
+account_initial_schema.sql
+
+# Password and security files
+*password*.py
+check_*passwords*.py
+set_simple_passwords.py
+verify_all_users.py
 
 # Static files
 /static
+staticfiles/
+/staticfiles
 
 # Media files
 /media
@@ -23,9 +41,31 @@ env/
 # IDE / Editor
 .vscode/
 .idea/
+*.swp
+*.swo
 
-# Other
+# OS generated files
 .DS_Store
-.env
-db.sqlite3
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Deployment
 .vercel
+Procfile.local
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Node modules (if any)
+node_modules/
+
+# Temporary files
+temp_settings.py
+test_*.py
+debug_*.py
