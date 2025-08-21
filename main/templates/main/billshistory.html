@@ -6,24 +6,30 @@
         <h1 class="h3 mb-2 text-primary font-weight-bolder">Bills History</h1><br>
     </div>
 
-
+    {% if not billshistory %}
+    <div class="card shadow mb-4">
+        <div class="card-body text-center py-5">
+            <i class="fas fa-file-invoice fa-4x text-gray-300 mb-3"></i>
+            <h4 class="text-gray-500">No billing history available</h4>
+            <p class="text-muted">Your billing history will appear here once available.</p>
+        </div>
+    </div>
+    {% else %}
     <div class="card shadow mb-4" data-aos="fade-up" data-aos-duration="1000" data-aos-easing="ease-in-out">
         <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary text-center">Bills History Data Table</h6>
+            <h6 class="m-0 font-weight-bold text-primary">Bills History Data Table</h6>
         </div>
         <div class="card-body">
             <div class="table-responsive">
                 <table class="table table-bordered tally-table" id="dataTable" width="100%" cellspacing="0">
                     <thead>
                         <tr>
+                            <th>Bill ID</th>
                             <th>Name</th>
-                            <th>Cubic Meter Consumption</th>
-                            <th>Consumption Cost</th>
+                            <th>Consumption (m³)</th>
+                            <th>Amount (KSh)</th>
                             <th>Due Date</th>
-                            <th>Penalty Date</th>
-                            <th>Penalty</th>
-                            <th>Payable Amount</th>
-                            <th>Pay Status</th>
+                            <th>Status</th>
                             {% if request.user.is_superuser %}
                             <th>Action</th> 
                             {% endif %}
@@ -31,29 +37,51 @@
                     </thead>
                     <tbody>
                        {% for bill in billshistory %}
-                        <tr>
-                            <td> {{bill.name}} </td>
-                            <td> {{bill.meter_consumption}} m³</td> 
-                            <td> KSh{{bill.compute_bill}}</td> 
-                            <td> {{bill.duedate}} </td> 
-                            <td> {{bill.penaltydate}} </td> 
-                            <td> {{bill.penalty}}</td> 
-                            <td class="font-weight-bolder text-primary"> KSh{{bill.payable}} </td> 
-                            <td> {{bill.status}}</td>
+                       <tr>
+                            <td>#{{ bill.id|stringformat:"05d" }}</td>
+                            <td>{{ bill.name }}</td>
+                            <td>{{ bill.meter_consumption|floatformat:2 }}</td>
+                            <td>{{ bill.payable|floatformat:2 }}</td>
+                            <td>{{ bill.duedate|date:"M d, Y" }}</td>
+                            <td>
+                                <span class="badge {% if bill.status == 'Paid' %}badge-success{% else %}badge-warning{% endif %}">
+                                    {{ bill.status }}
+                                </span>
+                            </td>
+
                             {% if request.user.is_superuser %}
                             <td class="text-center">  
-                                <a href="{% url 'update_bills' bill.id %}" class="btn btn-primary"><i class="fa-regular fa-pen-to-square"></i></a>
-                                <a href="{% url 'delete_bills' bill.id %}" class="btn btn-danger"><i class="fa-solid fa-trash-can"></i></a>
+                                <a href="{% url 'main:update_bills' bill.id %}" class="btn btn-sm btn-primary" title="Edit">
+                                    <i class="fa-regular fa-pen-to-square"></i>
+                                </a>
+                                <a href="{% url 'main:delete_bills' bill.id %}" class="btn btn-sm btn-danger" title="Delete" 
+                                   onclick="return confirm('Are you sure you want to delete this bill?')">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </a>
                             </td>
                             {% endif %}
-                        </tr>   
+                        </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
-
-
+    {% endif %}
 </div>
+
+<style>
+    .badge {
+        font-size: 0.8em;
+        padding: 0.35em 0.65em;
+    }
+    .badge-success {
+        background-color: #1cc88a;
+        color: white;
+    }
+    .badge-warning {
+        background-color: #f6c23e;
+        color: #000;
+    }
+</style>
 {% endblock %}

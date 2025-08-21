@@ -1,121 +1,116 @@
 {% extends 'main/layout.html' %}
 {% load static %}
+
 {% block body %}
 <div class="container-fluid">
     {% if request.user.is_superuser %}
-    <div class="d-flex"> 
-        <h1 class="h3 mb-2 text-primary font-weight-bolder">Ongoing Bills</h1><br>
-        <a class="ml-auto btn btn-primary mb-3" data-toggle="modal" data-target="#Addmodal">Add</a> 
+    <div class="mb-4">
+        <h1 class="h3 mb-0 text-primary font-weight-bolder">Ongoing Bills</h1>
     </div>
     {% else %}
-    <div class="text-center"> 
-        <h1 class="h3 mb-2 text-primary font-weight-bolder">Ongoing Bills</h1><br>
+    <div class="mb-4">
+        <h1 class="h3 mb-0 text-primary font-weight-bolder">My Ongoing Bills</h1>
     </div>
     {% endif %}
 
-
-    <div class="card shadow mb-4" data-aos="fade-up" data-aos-duration="1000" data-aos-easing="ease-in-out">
+    <div class="card shadow mb-4">
         <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary text-center">Ongoing Bills Data Table</h6>
+            <h6 class="m-0 font-weight-bold text-primary">
+                {% if request.user.is_superuser %}Ongoing Bills Data Table{% else %}My Current Bills{% endif %}
+            </h6>
         </div>
         <div class="card-body">
+            {% if ongoingbills %}
             <div class="table-responsive">
-                <table class="table table-bordered tally-table" id="dataTable" width="100%" cellspacing="0">
-                    <thead>
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead class="table-light">
                         <tr>
-                            <th>Name</th>
-                            <th>Cubic Meter Consumption</th>
-                            <th>Consumption Cost</th>
+                            {% if request.user.is_superuser %}
+                            <th>Client Name</th>
+                            {% endif %}
+                            <th>Billing Period</th>
+                            <th>Consumption (m³)</th>
+                            <th>Amount (KSh)</th>
                             <th>Due Date</th>
-                            <th>Penalty Date</th>
                             <th>Penalty</th>
-                            <th>Payable Amount</th>
-                            <th>Pay Status</th>
-                            <th>Action</th>
+                            <th>Total Payable</th>
+                            <th>Status</th>
+                            {% if request.user.is_superuser %}
+                            <th>Actions</th>
+                            {% endif %}
                         </tr>
                     </thead>
                     <tbody>
-                       {% for bill in ongoingbills %}
+                        {% for bill in ongoingbills %}
                         <tr>
-                            <td> {{bill.name}} </td>
-                            <td> {{bill.meter_consumption}} cu.m</td> 
-                            <td> KSh{{bill.compute_bill}}</td> 
-                            <td> {{bill.duedate}} </td> 
-                            <td> {{bill.penaltydate}} </td> 
-                            <td> {{bill.penalty}}</td> 
-                            <td class="font-weight-bolder text-primary"> KSh{{bill.payable}} </td> 
-                            <td> {{bill.status}}</td>
-                            <td class="text-center">
-                                {% if request.user.is_superuser %}
-                                <form method="POST" action="">
-                                    {% csrf_token %}
-                                    <input name="contact_number" type="text" value="{{bill.name.contact_number}}" hidden>
-                                    <input name="total_bill" type="text" value="{{bill.payable}}" hidden>
-                                    <input name="due_date" type="text" value="{{bill.duedate}}" hidden>   
-                                    <input name="penalty_date" type="text" value="{{bill.penaltydate}}" hidden>
-                                    <button name="notify" class="btn btn-primary" type="submit"> 
-                                        <i class="fa-solid fa-envelope"></i>
-                                    </button>
-                                    <a href="{% url 'update_bills' bill.id %}" class="btn btn-primary"><i class="fas fa-edit"></i></a>
-                                    <a href="{% url 'delete_bills' bill.id %}" class="btn btn-danger"><i class="fa-solid fa-trash-can"></i></a>
-                                </form>
-                                {% endif %}
-                                {% if bill.status != 'Paid' %}
-                                <a href="{% url 'initiate_mpesa_payment' bill.id %}" class="btn btn-success btn-sm">Pay with M-Pesa</a>
+                            {% if request.user.is_superuser %}
+                            <td class="font-weight-bold text-dark">
+                                {{ bill.name.name.first_name }} {{ bill.name.name.last_name }}
+                                {% if bill.name.middle_name %}
+                                    {{ bill.name.middle_name }}
                                 {% endif %}
                             </td>
-                        </tr>   
+                            {% endif %}
+                            <td>{{ bill.created_at|date:"M Y"|default:"-" }}</td>
+                            <td>{{ bill.meter_consumption|default:0|floatformat:2 }} m³</td>
+                            <td>KSh {{ bill.compute_bill|default:0|floatformat:2 }}</td>
+                            <td>{{ bill.due_date|date:"M d, Y"|default:"-" }}</td>
+                            <td>KSh {{ bill.penalty|default:0|floatformat:2 }}</td>
+                            <td class="font-weight-bold text-primary">KSh {{ bill.payable|default:0|floatformat:2 }}</td>
+                            <td>
+                                <span class="badge {% if bill.status == 'Paid' %}bg-success{% else %}bg-warning{% endif %}">
+                                    {{ bill.status|default:"Pending" }}
+                                </span>
+                            </td>
+                            {% if request.user.is_superuser %}
+                            <td class="text-center">
+                                <div class="btn-group" role="group">
+                                    <form method="POST" action="" class="d-inline">
+                                        {% csrf_token %}
+                                        <input name="contact_number" type="hidden" value="{{ bill.name.contact_number|default:'' }}">
+                                        <input name="total_bill" type="hidden" value="{{ bill.payable|default:0 }}">
+                                        <input name="due_date" type="hidden" value="{{ bill.due_date|date:'Y-m-d'|default:'' }}">
+                                        <button name="notify" class="btn btn-sm btn-info" type="submit" title="Send Reminder">
+                                            <i class="fas fa-envelope"></i>
+                                        </button>
+                                    </form>
+                                    <a href="{% url 'main:update_bills' bill.id %}" class="btn btn-sm btn-primary" title="Edit Bill">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'main:delete_bills' bill.id %}" class="btn btn-sm btn-danger" title="Delete Bill">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </a>
+                                </div>
+                            </td>
+                            {% endif %}
+                        </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
+                <h5 class="text-muted">No ongoing bills found</h5>
+                {% if request.user.is_superuser %}
+                <p class="text-muted">Click 'Add New Bill' to create a new bill</p>
+                {% else %}
+                <p class="text-muted">You don't have any pending bills at the moment</p>
+                {% endif %}
+            </div>
+            {% endif %}
+            
+            {% if not request.user.is_superuser and ongoingbills %}
+            <div class="mt-4 text-center">
+                <p class="text-muted">
+                    <i class="fas fa-info-circle"></i> Please contact the office for payment instructions.
+                </p>
+            </div>
+            {% endif %}
         </div>
     </div>
 
 {% if request.user.is_superuser %}
-
-<div class="modal fade" id="Addmodal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Add</b></h5>
-                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">×</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div id="reader"> </div>
-                <form name="attendance" action="" method="POST" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <div class="form-group mt-3">
-                        <label>Name: </label> <br>
-                        {{ form.name }}
-                    </div>
-                    <div class="form-group mt-3">
-                        <label>Meter Consumption: </label> <br>
-                        {{ form.meter_consumption }}
-                    </div>
-                    <div class="form-group mt-3">
-                        <label>Pay Status: </label> <br>
-                        {{ form.status }}
-                    </div>
-                    <div class="form-group mt-3">
-                        <label>Due Date: </label> <br>
-                        {{ form.duedate }}
-                    </div>
-                    <div class="form-group mt-3">
-                        <label>Penalty Date: </label> <br>
-                        {{ form.penaltydate }}
-                    </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-primary" type="submit">Confirm</button>
-                <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
 
 {% endif %}
 

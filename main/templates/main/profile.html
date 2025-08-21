@@ -1,65 +1,195 @@
 {% extends 'main/layout.html' %}
+{% load static %}
 
 {% block body %}
 <div class="container">
-    <div class="card o-hidden border-0 shadow-lg my-5">
-        <div class="card-body p-0">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="p-5">
-                        <div class="text-center">
-                            <h1 class="h4 text-gray-900 mb-4">Update Profile</h1>
-                        </div>
-                                                <form class="user" method="post">
-                            {% csrf_token %}
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        {{ account_form.first_name.label_tag }}
+    <div class="row justify-content-center">
+        <div class="col-xl-8 col-lg-10">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-user-edit me-2"></i>Update Profile
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <!-- Sweetify Messages -->
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                    
+                    <!-- SweetAlert2 Notifications -->
+                    {% if sweetify %}
+                        {% for message in sweetify %}
+                            <div class="d-none" data-sweetify="{{ message.tags }}" data-title="{{ message.title }}" data-text="{{ message.text }}" data-timer="{{ message.timer }}"></div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Account Information -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">Account Information</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="{{ account_form.first_name.id_for_label }}" class="form-label">
+                                            {{ account_form.first_name.label }}
+                                            {% if account_form.first_name.field.required %}<span class="text-danger">*</span>{% endif %}
+                                        </label>
                                         {{ account_form.first_name }}
+                                        {% if account_form.first_name.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ account_form.first_name.errors.0 }}
+                                            </div>
+                                        {% endif %}
                                     </div>
-                                    <div class="form-group">
-                                        {{ account_form.last_name.label_tag }}
+                                    <div class="col-md-6">
+                                        <label for="{{ account_form.last_name.id_for_label }}" class="form-label">
+                                            {{ account_form.last_name.label }}
+                                            {% if account_form.last_name.field.required %}<span class="text-danger">*</span>{% endif %}
+                                        </label>
                                         {{ account_form.last_name }}
+                                        {% if account_form.last_name.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ account_form.last_name.errors.0 }}
+                                            </div>
+                                        {% endif %}
                                     </div>
-                                    <div class="form-group">
-                                        {{ account_form.email.label_tag }}
+                                    <div class="col-md-6">
+                                        <label for="{{ account_form.email.id_for_label }}" class="form-label">
+                                            {{ account_form.email.label }}
+                                            <span class="text-danger">*</span>
+                                        </label>
                                         {{ account_form.email }}
+                                        {% if account_form.email.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ account_form.email.errors.0 }}
+                                            </div>
+                                        {% endif %}
                                     </div>
-                                    <div class="form-group">
-                                        {{ account_form.phone_number.label_tag }}
+                                    <div class="col-md-6">
+                                        <label for="{{ account_form.phone_number.id_for_label }}" class="form-label">
+                                            {{ account_form.phone_number.label }}
+                                        </label>
                                         {{ account_form.phone_number }}
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    {% if client_form %}
-                                        <div class="form-group">
-                                            {{ client_form.middle_name.label_tag }}
-                                            {{ client_form.middle_name }}
-                                        </div>
-                                        <div class="form-group">
-                                            {{ client_form.contact_number.label_tag }}
-                                            {{ client_form.contact_number }}
-                                        </div>
-                                        <div class="form-group">
-                                            {{ client_form.address.label_tag }}
-                                            {{ client_form.address }}
-                                        </div>
-                                    {% endif %}
-                                    <div class="form-group">
-                                        {{ account_form.password.label_tag }}
-                                        {{ account_form.password }}
+                                        {% if account_form.phone_number.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ account_form.phone_number.errors.0 }}
+                                            </div>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-primary btn-user btn-block">
-                                Update Profile
+                        </div>
+
+                        <!-- Password Change (Simplified) -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">Change Password</h6>
+                                <small class="text-muted">Enter new password to change it</small>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="{{ account_form.new_password.id_for_label }}" class="form-label">
+                                            New Password
+                                        </label>
+                                        <input type="password" 
+                                               name="new_password" 
+                                               class="form-control" 
+                                               id="id_new_password" 
+                                               placeholder="Enter new password"
+                                               autocomplete="new-password">
+                                        {% if account_form.new_password.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ account_form.new_password.errors.0 }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="{{ account_form.confirm_password.id_for_label }}" class="form-label">
+                                            Confirm New Password
+                                        </label>
+                                        <input type="password" 
+                                               name="confirm_password" 
+                                               class="form-control" 
+                                               id="id_confirm_password" 
+                                               placeholder="Confirm new password"
+                                               autocomplete="new-password">
+                                        {% if account_form.confirm_password.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ account_form.confirm_password.errors.0 }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                       
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% if is_client %}{% url 'main:client_dashboard' %}{% else %}{% url 'main:dashboard' %}{% endif %}" 
+                               class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+                            </a>
+                            <button type="submit" class="btn btn-primary ms-auto">
+                                <i class="fas fa-save me-1"></i> Save Changes
                             </button>
-                        </form>
-                    </div>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 </div>
-{% endblock body %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Enable Bootstrap form validation
+(function () {
+    'use strict'
+    
+    // Fetch all the forms we want to apply custom Bootstrap validation styles to
+    var forms = document.querySelectorAll('.needs-validation')
+    
+    // Loop over them and prevent submission
+    Array.prototype.slice.call(forms).forEach(function (form) {
+        form.addEventListener('submit', function (event) {
+            if (!form.checkValidity()) {
+                event.preventDefault()
+                event.stopPropagation()
+            }
+            
+            form.classList.add('was-validated')
+        }, false)
+    })
+})()
+
+// Toggle password visibility
+function togglePassword(fieldId) {
+    const field = document.getElementById(fieldId);
+    const type = field.getAttribute('type') === 'password' ? 'text' : 'password';
+    field.setAttribute('type', type);
+    
+    // Toggle icon
+    const icon = field.nextElementSibling.querySelector('i');
+    if (type === 'password') {
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    } else {
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    }
+}
+</script>
+{% endblock %}

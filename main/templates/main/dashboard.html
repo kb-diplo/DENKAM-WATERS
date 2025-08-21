@@ -6,107 +6,194 @@
     <div class="container-fluid">
 
             <div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
-    <div>
-        <a href="{% url 'admin_register_user' %}" class="btn btn-primary btn-sm shadow-sm">
-            <i class="fas fa-user-plus fa-sm text-white-50"></i> Register New User
-        </a>
-        <a href="{% url 'meter_reader_register' %}" class="btn btn-info btn-sm shadow-sm">
-            <i class="fas fa-user-plus fa-sm text-white-50"></i> Add Meter Reader
-        </a>
-    </div>
-</div>
+                <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+                {% if request.user.role == 'ADMIN' %}
+                <div>
+                    <a href="{% url 'main:clients' %}" class="btn btn-primary btn-sm shadow-sm">
+                        <i class="fas fa-users fa-sm text-white-50"></i> Manage Clients
+                    </a>
+                    <a href="{% url 'main:reports' %}" class="btn btn-success btn-sm shadow-sm ml-2">
+                        <i class="fas fa-chart-bar fa-sm text-white-50"></i> View Reports
+                    </a>
+                </div>
+                {% endif %}
+            </div>
 
 
         <!--ROW-->
 
+        <!-- Summary Cards Row -->
         <div class="row" data-aos="fade-up" data-aos-duration="1000" data-aos-easing="ease-in-out">
-
+            <!-- Clients Card -->
             <div class="col-xl-3 col-md-6 mb-4">
                 <div class="card border-left-primary shadow h-100 py-2">
                     <div class="card-body">
                         <div class="row no-gutters align-items-center">
                             <div class="col mr-2">
-                                
-                                <a href="{% url 'clients' %}">
-                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                    Clients
-                                </div>
+                                <a href="{% url 'main:clients' %}">
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                        Total Clients
+                                    </div>
                                 </a>
                                 <div class="h5 mb-0 font-weight-bold text-gray-800">{{ clients }}</div>
                             </div>
                             <div class="col-auto">
-                                <i class="fa-solid fa-people-group fa-2x text-gray-300"></i>
+                                <i class="fas fa-users fa-2x text-gray-300"></i>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
+            <!-- Total Bills Card -->
             <div class="col-xl-3 col-md-6 mb-4">
-                <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card border-left-info shadow h-100 py-2">
                     <div class="card-body">
                         <div class="row no-gutters align-items-center">
                             <div class="col mr-2">
-                                
-                                <a href="{% url 'ongoing_bills' %}">
-                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                    Ongoing Bills
-                                </div>
+                                <a href="{% url 'main:ongoing_bills' %}">
+                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                        Total Bills
+                                    </div>
                                 </a>
                                 <div class="h5 mb-0 font-weight-bold text-gray-800">{{ bills }}</div>
                             </div>
                             <div class="col-auto">
-                                <i class="fa-solid fa-people-group fa-2x text-gray-300"></i>
+                                <i class="fas fa-file-invoice fa-2x text-gray-300"></i>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-
+            <!-- Revenue Card -->
             <div class="col-xl-3 col-md-6 mb-4">
-                <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card border-left-success shadow h-100 py-2">
                     <div class="card-body">
                         <div class="row no-gutters align-items-center">
                             <div class="col mr-2">
-                                
-                                <a href="{% url 'clients' %}">
-                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                    Connected
-                                </div>
+                                <a href="{% url 'main:reports' %}">
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                        Total Revenue
+                                    </div>
                                 </a>
-                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ connecteds }}</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">Ksh {{ total_revenue|floatformat:2 }}</div>
                             </div>
                             <div class="col-auto">
-                                <i class="fa-solid fa-people-group fa-2x text-gray-300"></i>
+                                <i class="fas fa-money-bill-wave fa-2x text-gray-300"></i>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
+            <!-- Outstanding Payments Card -->
             <div class="col-xl-3 col-md-6 mb-4">
-                <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card border-left-warning shadow h-100 py-2">
                     <div class="card-body">
                         <div class="row no-gutters align-items-center">
                             <div class="col mr-2">
-                                
-                                <a href="{% url 'clients' %}">
-                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                    Disconnected
-                                </div>
+                                <a href="{% url 'main:reports' %}">
+                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                        Outstanding
+                                    </div>
                                 </a>
-                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ disconnecteds }}</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">Ksh {{ outstanding_payments|floatformat:2 }}</div>
                             </div>
                             <div class="col-auto">
-                                <i class="fa-solid fa-people-group fa-2x text-gray-300"></i>
+                                <i class="fas fa-exclamation-circle fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Cards Row -->
+        <div class="row">
+            <!-- Paid Bills Card -->
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-success shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <a href="{% url 'main:reports' %}">
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                        Paid Bills
+                                    </div>
+                                </a>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ paid_bills_count }}</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-check-circle fa-2x text-gray-300"></i>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
+            <!-- Pending Bills Card -->
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-warning shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <a href="{% url 'main:reports' %}">
+                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                        Pending Bills
+                                    </div>
+                                </a>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ pending_bills_count }}</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-clock fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Overdue Bills Card -->
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-danger shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <a href="{% url 'main:reports' %}">
+                                    <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                        Overdue Bills
+                                    </div>
+                                </a>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ overdue_bills_count }}</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Meter Readers Card -->
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-info shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <a href="{% url 'account:admin_register_meter_reader' %}">
+                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                        Meter Readers
+                                    </div>
+                                </a>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ meter_readers_count }}</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-user-tie fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
 
@@ -135,16 +222,14 @@
                     <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th>Client Name</th>
-                                <th>Meter Consumption</th>
+                                <th>Bill #</th>
                                 <th>Status</th>
                             </tr>
                         </thead>
                         <tbody>
-                           {% for bill in ongoingbills %}
+                            {% for bill in ongoingbills %}
                             <tr>
-                                <td> {{bill.name}} </td>
-                                <td> {{bill.meter_consumption}} cu.m</td>
+                                <td>Bill #{{bill.id}}</td>
                                 <td> {{bill.status}} </td>
                             </tr>
                             {% endfor %}

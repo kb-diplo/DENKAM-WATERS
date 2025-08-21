@@ -5,7 +5,10 @@
     {% if request.user.is_superuser %}
     <div class="d-flex"> 
         <h1 class="h3 mb-2 text-primary font-weight-bolder">Clients</h1><br>
-        <a class="ml-auto btn btn-primary mb-3" data-toggle="modal" data-target="#Addmodal">Add Client</a> 
+        <div class="ml-auto">
+            <a class="btn btn-primary mb-3" data-toggle="modal" data-target="#Addmodal">Add Client</a>
+            <a class="btn btn-success mb-3 ml-2" href="{% url 'main:clients' %}?export=csv">Download CSV</a>
+        </div>
     </div>
     {% else %}
     <div class="text-center"> 
@@ -25,30 +28,21 @@
                         <tr>
                             <th>Meter Number</th>
                             <th>Full Name</th>
+                            <th>Email</th>
                             <th>Contact Number</th>
                             <th>Address</th>
-                            <th>Connection Status</th>
-
-                            {% if request.user.is_superuser %}
-                            <th>Action</th> 
-                            {% endif %}
+                            <th>Status</th>
                         </tr>
                     </thead>
                     <tbody>
                        {% for client in clients %}
                         <tr>
-                            <th> {{ client.meter_number }} </th>
-                            <th> {{client.last_name}}, {{client.first_name}} {% if client.middle_name %} {{ client.middlename }} {% endif %}</th>
-                            <th> {{ client.contact_number}} </th>
-                            <th> {{ client.address }} </th>
-                            <th> {{client.status}} </th>
-                            <td class="text-center">
-                                <a href="{% url 'manage_billing' client.id %}" class="btn btn-primary btn-sm">Manage Billing</a>
-                                {% if request.user.role == 'ADMIN' %}
-                                <a href="{% url 'client_update' client.id %}" class="btn btn-info btn-sm">Update</a>
-                                <a href="{% url 'client_delete' client.id %}" class="btn btn-danger btn-sm">Delete</a>
-                                {% endif %}
-                            </td>
+                            <td>{{ client.meter_number|default:'-' }}</td>
+                            <td>{% if client.name %}{{ client.name.get_full_name|default:'-' }}{% else %}{{ client.first_name }} {% if client.middle_name %}{{ client.middle_name }} {% endif %}{{ client.last_name }}{% endif %}</td>
+                            <td>{{ client.name.email|default:'-' }}</td>
+                            <td>{{ client.contact_number|default:'-' }}</td>
+                            <td>{{ client.address|truncatechars:30|default:'-' }}</td>
+                            <td><span class="badge {% if client.status == 'Active' %}badge-success{% else %}badge-warning{% endif %}">{{ client.status }}</span></td>
                         </tr>   
                         {% endfor %}
                     </tbody>
@@ -59,11 +53,11 @@
 
 {% if request.user.is_superuser %}
 
-<div class="modal fade" id="Addmodal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+<div class="modal fade" id="Addmodal" tabindex="-1" role="dialog" aria-labelledby="addClientModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Add Client</b></h5>
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="addClientModalLabel">Add New Client</h5>
                 <button class="close" type="button" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">×</span>
                 </button>
@@ -90,6 +84,18 @@
                     </div>
                     
                     <div class="form-group mt-3">
+                        <label>Email: </label> <br>
+                        {{ form.email }}
+                    </div>
+                    <div class="form-group mt-3">
+                        <label>Password: </label> <br>
+                        {{ form.password }}
+                    </div>
+                    <div class="form-group mt-3">
+                        <label>Confirm Password: </label> <br>
+                        {{ form.confirm_password }}
+                    </div>
+                    <div class="form-group mt-3">
                         <label>Contact Number: </label> <br>
                         {{ form.contact_number }}
                     </div>
@@ -104,10 +110,14 @@
                 
             </div>
             <div class="modal-footer">
-                <button class="btn btn-primary" type="submit">Confirm</button>
-                <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                </form>
+                <button class="btn btn-primary" type="submit">
+                    <i class="fas fa-user-plus mr-1"></i> Add Client
+                </button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times mr-1"></i> Cancel
+                </button>
             </div>
+        </form>
         </div>
     </div>
 </div>

@@ -1,30 +1,24 @@
 {% extends 'main/layout.html' %}
+{% load static %}
 
 {% block body %}
 <div class="container-fluid">
     <!-- Page Heading -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Meter Reader Dashboard</h1>
         <div>
-            <a href="{% url 'meter_reader_register_user' %}" class="btn btn-success btn-icon-split mr-2">
-                <span class="icon text-white-50"><i class="fas fa-user-plus"></i></span>
-                <span class="text">Register New Client</span>
-            </a>
-            <a href="{% url 'meter_reading' %}" class="btn btn-primary btn-icon-split">
-                <span class="icon text-white-50"><i class="fas fa-tachometer-alt"></i></span>
-                <span class="text">Add Meter Reading</span>
-            </a>
+            <h1 class="h3 mb-0 text-gray-800">Meter Reader Dashboard</h1>
+            <p class="text-muted">Welcome back, {{ request.user.get_full_name|default:request.user.email }}</p>
         </div>
     </div>
-
-    <!-- Content Row -->
+    
+    <!-- Stats Cards -->
     <div class="row">
-        <div class="col-xl-4 col-md-6 mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-primary shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Clients Assigned</div>
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Clients</div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_clients_count }}</div>
                         </div>
                         <div class="col-auto">
@@ -35,12 +29,12 @@
             </div>
         </div>
 
-        <div class="col-xl-4 col-md-6 mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-success shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Clients Billed (This Month)</div>
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Billed This Month</div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">{{ billed_clients_count }}</div>
                         </div>
                         <div class="col-auto">
@@ -51,12 +45,12 @@
             </div>
         </div>
 
-        <div class="col-xl-4 col-md-6 mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-warning shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Pending Readings (This Month)</div>
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Pending Readings</div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">{{ pending_clients_count }}</div>
                         </div>
                         <div class="col-auto">
@@ -68,149 +62,505 @@
         </div>
     </div>
 
-    <!-- Client List Table -->
+    <!-- Client List -->
     <div class="card shadow mb-4">
-        <div class="card-header py-3">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
             <h6 class="m-0 font-weight-bold text-primary">Client List</h6>
+            <div class="input-group" style="max-width: 300px;">
+                <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                </div>
+                <input type="text" id="clientSearch" class="form-control form-control-sm" placeholder="Search by name, meter, or contact...">
+            </div>
         </div>
         <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-bordered" id="clientsTable" width="100%" cellspacing="0">
-                    <thead>
-                        <tr>
-                            <th>Full Name</th>
-                            <th>Address</th>
-                            <th>Contact Number</th>
-                            <th>Status (This Month)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for client in clients %}
-                        <tr>
-                            <td>{{ client.name.get_full_name }}</td>
-                            <td>{{ client.address }}</td>
-                            <td>{{ client.contact_number }}</td>
-                            <td>
-                                {% if client.name.id in billed_client_ids %}
-                                    <span class="badge badge-success">Billed</span>
-                                {% else %}
-                                    <span class="badge badge-warning">Pending</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="4" class="text-center">No clients found.</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+            {% if clients %}
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="clientTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Client Name</th>
+                                <th>Meter Number</th>
+                                <th>Contact</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for client in clients %}
+                            <tr>
+                                <td>{{ client.name.get_full_name|default:client.name.email }}</td>
+                                <td>{{ client.meter_number|default:"N/A" }}</td>
+                                <td>{{ client.contact_number|default:"N/A" }}</td>
+                                <td>
+                                    {% if client.id in billed_client_ids %}
+                                        <span class="badge badge-success">Billed</span>
+                                    {% else %}
+                                        <span class="badge badge-warning">Pending</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if client.id in billed_client_ids %}
+                                        <span class="btn btn-sm btn-secondary" disabled>
+                                            <i class="fas fa-check-circle mr-1"></i>
+                                            Reading Taken
+                                        </span>
+                                    {% else %}
+                                        <button class="btn btn-sm btn-primary add-reading-btn" 
+                                                data-client-id="{{ client.id }}"
+                                                data-client-name="{{ client.name.get_full_name|default:client.name.email }}"
+                                                data-previous-reading="{{ client.last_reading|default:'0' }}">
+                                            <i class="fas fa-tachometer-alt mr-1"></i>
+                                            Add Reading
+                                        </button>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-users fa-3x text-gray-300 mb-3"></i>
+                    <p class="mb-0">No clients found in the system.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal for adding reading -->
+<div class="modal fade" id="addReadingModal" tabindex="-1" role="dialog" aria-labelledby="addReadingModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addReadingModalLabel">Add Meter Reading</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="readingForm">
+                    {% csrf_token %}
+                    <input type="hidden" id="client_id" name="client_id">
+                    <div class="form-group">
+                        <label class="font-weight-bold">Previous Reading:</label>
+                        <div class="form-control-plaintext" id="previous_reading_display">0.00 m³</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="reading_value">Current Reading (m³)</label>
+                        <input type="number" step="0.01" min="0" class="form-control" id="reading_value" name="reading_value" required>
+                        <small class="form-text text-muted">Enter the current meter reading value</small>
+                    </div>
+                    <div class="form-group">
+                        <label class="font-weight-bold">Consumption:</label>
+                        <div class="form-control-plaintext" id="consumption_display">0.00 m³</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" id="saveReadingBtn" class="btn btn-primary">
+                    <span class="submit-text">Save</span>
+                    <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                </button>
             </div>
         </div>
     </div>
 </div>
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    var searchTimeout;
+    var $searchInput = $("#clientSearch");
+    var $clientTable = $("#clientTable");
+    var $clientTableBody = $("#clientTable tbody");
+    var $noResults = $("#noResults");
+    var $loadingIndicator = $("#searchLoading");
+    
+    // Add no results message after the table if it doesn't exist
+    if ($noResults.length === 0) {
+        $clientTable.after('<div id="noResults" class="text-center py-3" style="display:none;">' +
+                         '<i class="fas fa-search fa-2x text-muted mb-2"></i>' +
+                         '<p class="mb-0">No matching clients found. Try a different search term.</p></div>');
+        $noResults = $("#noResults");
+    }
+    
+    // Add loading indicator if it doesn't exist
+    if ($loadingIndicator.length === 0) {
+        $searchInput.after('<div id="searchLoading" class="position-absolute" style="right: 2.5rem; top: 50%; transform: translateY(-50%); display: none;">' +
+                         '<div class="spinner-border spinner-border-sm text-secondary" role="status">' +
+                         '<span class="sr-only">Loading...</span></div></div>');
+        $loadingIndicator = $("#searchLoading");
+    }
+    
+    // Function to perform search via AJAX
+    function performSearch() {
+        var searchTerm = $searchInput.val().trim();
+        
+        // Show loading indicator
+        $loadingIndicator.show();
+        
+        // Clear previous timeout
+        clearTimeout(searchTimeout);
+        
+        // If search is empty, show all clients by reloading the page
+        if (searchTerm === '') {
+            window.location.href = window.location.pathname;
+            return;
+        }
+        
+        // Set a new timeout for debouncing
+        searchTimeout = setTimeout(function() {
+            $.ajax({
+                url: window.location.pathname,
+                type: 'GET',
+                data: { search: searchTerm },
+                dataType: 'json',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                success: function(response) {
+                    // Clear existing rows
+                    $clientTableBody.empty();
+                    
+                    // Get the results from the response
+                    const results = response.results || [];
+                    
+                    if (results.length > 0) {
+                        // Add new rows from search results
+                        $.each(results, function(index, client) {
+                            const statusBadge = client.is_billed ? 
+                                '<span class="badge badge-success">Billed</span>' : 
+                                '<span class="badge badge-warning">Pending</span>';
+                                
+                            let actionButton = '';
+                            if (client.is_billed) {
+                                actionButton = `
+                                    <span class="btn btn-sm btn-secondary" disabled>
+                                        <i class="fas fa-check-circle mr-1"></i>
+                                        Reading Taken
+                                    </span>`;
+                            } else {
+                                actionButton = `
+                                    <button class="btn btn-sm btn-primary add-reading-btn" 
+                                            data-client-id="${client.id}"
+                                            data-client-name="${client.name}"
+                                            data-previous-reading="${client.last_reading || '0'}">
+                                        <i class="fas fa-tachometer-alt mr-1"></i>
+                                        Add Reading
+                                    </button>`;
+                            }
+                            
+                            const row = `
+                                <tr>
+                                    <td>${client.name}</td>
+                                    <td>${client.meter_number || 'N/A'}</td>
+                                    <td>${client.contact_number || 'N/A'}</td>
+                                    <td>${statusBadge}</td>
+                                    <td class="text-center">${actionButton}</td>
+                                </tr>`;
+                            
+                            $clientTableBody.append(row);
+                        });
+                        
+                        // Re-initialize tooltips for the new elements
+                        $('[data-toggle="tooltip"]').tooltip();
+                        
+                        // Show the table and hide the no results message
+                        $noResults.hide();
+                        $clientTable.show();
+                    } else {
+                        // No results found
+                        $clientTable.hide();
+                        $noResults.show();
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Search error:', error, 'Status:', status);
+                    console.error('Response text:', xhr.responseText);
+                    // Show a user-friendly error message
+                    sweetify.error('An error occurred while searching. Please try again.');
+                },
+                complete: function() {
+                    $loadingIndicator.hide();
+                }
+            });
+        }, 300); // 300ms debounce for better responsiveness
+    }
+    
+    // Search on keyup with debounce
+    $searchInput.on('input', function() {
+        performSearch();
+    });
+    
+    // Handle form submission (prevent default)
+    $('form[role="search"]').on('submit', function(e) {
+        e.preventDefault();
+        performSearch();
+    });
+    
+    // Clear search when clicking the clear button (x) in the search input
+    $searchInput.on('search', function() {
+        if ($(this).val() === '') {
+            window.location.href = window.location.pathname;
+        }
+    });
+    
+    // Initial search in case there's a value in the search box
+    if ($searchInput.val()) {
+        performSearch();
+    }
+    
+    // Add styling for search input group
+    $('.input-group').css('position', 'relative');
+});
+
+// Store the row reference when the add reading button is clicked
+var $row;
+
+// Handle modal show event to populate form data
+$('#addReadingModal').on('show.bs.modal', function(event) {
+    var button = $(event.relatedTarget);
+    var clientId = button.data('client-id');
+    var clientName = button.data('client-name');
+    var previousReading = parseFloat(button.data('previous-reading')) || 0;
+    
+    // Store the row reference for later use
+    $row = button.closest('tr');
+    
+    // Update modal content
+    var modal = $(this);
+    modal.find('.modal-title').text('Add Meter Reading - ' + clientName);
+    modal.find('#client_id').val(clientId);
+    modal.find('#previous_reading_display').text(previousReading.toFixed(2) + ' m³');
+    
+    // Reset the form
+    var form = modal.find('form')[0];
+    form.reset();
+    
+    // Set the min value to previous reading
+    var readingInput = modal.find('#reading_value');
+    readingInput.attr('min', previousReading);
+    
+    // Set placeholder to guide the user
+    readingInput.attr('placeholder', `Enter value ≥ ${previousReading.toFixed(2)}`);
+    
+    // Reset consumption display
+    modal.find('#consumption_display').text('0.00 m³');
+    
+    // Reset form validation
+    form.classList.remove('was-validated');
+    
+    // Focus the reading input
+    setTimeout(() => {
+        readingInput.focus();
+    }, 500);
+});
+
+// Handle add reading button click
+$(document).on('click', '.add-reading-btn', function() {
+    const $button = $(this);
+    const clientId = $button.data('client-id');
+    const clientName = $button.data('client-name');
+    const previousReading = parseFloat($button.data('previous-reading')) || 0;
+    
+    // Update modal title and set client ID
+    $('#addReadingModalLabel').text(`Add Meter Reading - ${clientName}`);
+    $('#client_id').val(clientId);
+    
+    // Set previous reading display and update min value for current reading
+    $('#previous_reading_display').text(previousReading.toFixed(2) + ' m³');
+    const currentInput = $('#reading_value');
+    currentInput.val('').attr({
+        'min': previousReading,
+        'step': '0.01',
+        'placeholder': `Enter reading (min: ${previousReading.toFixed(2)})`
+    }).trigger('input');
+    
+    // Update consumption display
+    currentInput.off('input').on('input', function() {
+        const currentValue = parseFloat($(this).val()) || 0;
+        const consumption = (currentValue - previousReading).toFixed(2);
+        $('#consumption_display').text(consumption + ' m³');
+    });
+    
+    // Reset the form state when showing the modal
+    const $form = $('#readingForm');
+    $form.data('row', $row); // Store the row reference in the form data
+    $form.find('.is-invalid').removeClass('is-invalid');
+    $form.find('.invalid-feedback').remove();
+    
+    // Show the modal and focus the input
+    $('#addReadingModal').modal('show');
+    setTimeout(() => currentInput.focus(), 500);
+});
+
+// Debug function to log to console and show in alert
+function debugLog(message) {
+    console.log('DEBUG:', message);
+    // Uncomment the next line to show alerts for debugging
+    // alert('DEBUG: ' + message);
+}
+
+// New reliable Save button handler
+$(document).on('click', '#saveReadingBtn', function(e) {
+    debugLog('Save button clicked');
+    e.preventDefault(); // Prevent any default behavior
+    e.stopPropagation(); // Stop event bubbling
+    const submitBtn = $(this);
+    const submitText = submitBtn.find('.submit-text');
+    const spinner = submitBtn.find('.spinner-border');
+    const clientId = $('#client_id').val();
+    const readingValue = $('#reading_value').val();
+    const csrfToken = $('input[name=csrfmiddlewaretoken]').val();
+    
+    // Basic validation with debug
+    debugLog('Validating input - Reading Value: ' + readingValue);
+    if (!readingValue || isNaN(parseFloat(readingValue)) || parseFloat(readingValue) < 0) {
+        const errorMsg = 'Please enter a valid reading value';
+        debugLog(errorMsg);
+        alert(errorMsg);
+        return false;
+    }
+    
+    // Show loading state
+    submitBtn.prop('disabled', true);
+    submitText.text('Saving...');
+    spinner.removeClass('d-none');
+    
+    // Validate form
+    const currentReading = parseFloat($('#reading_value').val());
+    if (isNaN(currentReading) || currentReading < 0) {
+        alert('Please enter a valid reading value');
+        return false;
+    }
+    
+    // Show loading state
+    submitBtn.prop('disabled', true);
+    submitText.text('Saving...');
+    spinner.removeClass('d-none');
+    
+    // Get CSRF token from cookies
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    const csrftoken = getCookie('csrftoken');
+    
+    // Prepare data for submission
+    const postData = {
+        'client_id': clientId,
+        'reading_value': readingValue,
+        'csrfmiddlewaretoken': csrfToken
+    };
+    
+    debugLog('Making AJAX request with data: ' + JSON.stringify(postData));
+    
+    // Make AJAX request with full path to ensure it works
+    const apiUrl = window.location.origin + '/api/record-meter-reading/';
+    console.log('Sending request to:', apiUrl);
+    
+    $.ajax({
+        url: apiUrl,
+        type: 'POST',
+        data: postData,
+        dataType: 'json',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': csrfToken
+        },
+        success: function(response) {
+            if (response.success) {
+                // Reset button state first
+                submitBtn.prop('disabled', false);
+                submitText.text('Save');
+                spinner.addClass('d-none');
+                
+                // Close the modal
+                $('#addReadingModal').modal('hide');
+                
+                // Show success message
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: response.message || 'Meter reading saved successfully!',
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+                
+                // Refresh the table to show updated data
+                performSearch();
+                
+            } else {
+                // Show error message
+                let errorMessage = response.message || 'Failed to save meter reading. Please try again.';
+                
+                // Reset button state
+                submitBtn.prop('disabled', false);
+                submitText.text('Save');
+                spinner.addClass('d-none');
+                
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: errorMessage,
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    // Re-focus the input field if there was an error
+                    $('#reading_value').focus();
+                });
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Error saving meter reading:', error);
+            
+            // Reset button state
+            submitBtn.prop('disabled', false);
+            submitText.text('Save');
+            spinner.addClass('d-none');
+            
+            let errorMessage = 'Failed to save meter reading. Please try again.';
+            
+            if (xhr.status === 403) {
+                errorMessage = 'Session expired. Please refresh the page and try again.';
+            } else if (xhr.responseJSON && xhr.responseJSON.message) {
+                errorMessage = xhr.responseJSON.message;
+            }
+            
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: errorMessage,
+                confirmButtonText: 'OK'
+            }).then(() => {
+                // Re-focus the input field if there was an error
+                $('#reading_value').focus();
+            });
+        },
+        complete: function() {
+            // Reset button state
+            submitBtn.prop('disabled', false);
+            submitText.text('Save');
+            spinner.addClass('d-none');
+        }
+    });
+});
+</script>
 {% endblock %}
-        <h1 class="h3 mb-0 text-gray-800">Meter Reader Dashboard</h1>
-    </div>
 
-    <!-- Content Row -->
-    <div class="row">
-
-        <div class="col-xl-4 col-md-6 mb-4">
-            <div class="card border-left-primary shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                Total Clients</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_clients_count }}</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-users fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-4 col-md-6 mb-4">
-            <div class="card border-left-success shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                Billed Clients (This Month)</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ billed_clients_count }}</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-4 col-md-6 mb-4">
-            <div class="card border-left-warning shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                Pending Readings</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ pending_clients_count }}</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-clock fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Client List Table -->
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Client List</h6>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Address</th>
-                            <th>Meter Number</th>
-                            <th>Billing Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for client in clients %}
-                        <tr>
-                            <td>{{ client.name.get_full_name }}</td>
-                            <td>{{ client.address }}</td>
-                            <td>{{ client.meter_number }}</td>
-                            <td>
-                                {% if client.id in billed_client_ids %}
-                                    <span class="badge badge-success">Billed</span>
-                                {% else %}
-                                    <span class="badge badge-warning">Pending</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if client.id in billed_client_ids %}
-                                    <a href="{% url 'manage_billing' client.pk %}" class="btn btn-info btn-sm">Update Reading</a>
-                                {% else %}
-                                    <a href="{% url 'manage_billing' client.pk %}" class="btn btn-primary btn-sm">Add Reading</a>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock body %}
+{% endblock %}

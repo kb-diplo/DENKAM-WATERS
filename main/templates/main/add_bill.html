@@ -1,0 +1,141 @@
+{% extends 'main/layout.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card my-5">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-plus-circle mr-2"></i>Add New Bill
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="addBillForm">
+                        {% csrf_token %}
+                        
+                        <!-- Client Selection -->
+                        <div class="form-group">
+                            <label for="{{ form.client.id_for_label }}">
+                                <i class="fas fa-user mr-2"></i>Select Customer
+                            </label>
+                            {{ form.client }}
+                            {% if form.client.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.client.errors|first }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Previous Reading (Auto-filled) -->
+                        <div class="form-group">
+                            <label for="{{ form.previous_reading.id_for_label }}">
+                                <i class="fas fa-tachometer-alt mr-2"></i>Previous Reading
+                            </label>
+                            <div class="input-group">
+                                {{ form.previous_reading }}
+                                <div class="input-group-append">
+                                    <span class="input-group-text">m³</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Current Reading -->
+                        <div class="form-group">
+                            <label for="{{ form.current_reading.id_for_label }}">
+                                <i class="fas fa-tachometer-alt mr-2"></i>Current Reading
+                            </label>
+                            <div class="input-group">
+                                {{ form.current_reading }}
+                                <div class="input-group-append">
+                                    <span class="input-group-text">m³</span>
+                                </div>
+                            </div>
+                            {% if form.current_reading.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.current_reading.errors|first }}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">
+                                Enter the current meter reading. It must be greater than or equal to the previous reading.
+                            </small>
+                        </div>
+                        
+                        <div class="form-group mt-4">
+                            <div class="d-flex justify-content-between">
+                                <a href="{% url 'main:ongoing_bills' %}" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left mr-2"></i>Back to Bills
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save mr-2"></i>Save Bill
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include Select2 for enhanced dropdown -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+$(document).ready(function() {
+    // Initialize Select2 for client dropdown
+    $('#id_client').select2({
+        placeholder: 'Search for a customer...',
+        allowClear: true,
+        width: '100%'
+    });
+    
+    // When client selection changes, fetch previous reading
+    $('#id_client').on('change', function() {
+        const clientId = $(this).val();
+        if (clientId) {
+            // Show loading state
+            const prevReadingField = $('#id_previous_reading');
+            prevReadingField.val('Loading...');
+            
+            // Fetch previous reading via AJAX
+            $.ajax({
+                url: '{% url "main:get_previous_reading" %}',
+                data: { 'client_id': clientId },
+                dataType: 'json',
+                success: function(data) {
+                    if (data.previous_reading !== undefined) {
+                        prevReadingField.val(data.previous_reading.toFixed(2));
+                    } else {
+                        prevReadingField.val('0.00');
+                    }
+                },
+                error: function() {
+                    prevReadingField.val('Error loading reading');
+                }
+            });
+        } else {
+            $('#id_previous_reading').val('0.00');
+        }
+    });
+    
+    // Form validation
+    $('#addBillForm').on('submit', function(e) {
+        const currentReading = parseFloat($('#id_current_reading').val()) || 0;
+        const previousReading = parseFloat($('#id_previous_reading').val()) || 0;
+        
+        if (currentReading < previousReading) {
+            e.preventDefault();
+            alert('Current reading cannot be less than the previous reading.');
+            return false;
+        }
+        return true;
+    });
+});
+</script>
+{% endblock %}

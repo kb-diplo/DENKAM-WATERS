@@ -4,45 +4,125 @@
 {% block content %}
 <div class="container">
     <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card my-5">
-                <div class="card-header">
-                    <h5 class="card-title text-center font-weight-bolder">Update Client: {{ client.first_name }} {{ client.last_name }}</h5>
+        <div class="col-lg-10">
+            <div class="card shadow-lg my-5">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="card-title mb-0">
+                        <i class="fas fa-user-edit mr-2"></i>
+                        Update Client: {{ client.get_full_name }}
+                    </h4>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="" novalidate>
+                    <form method="POST" novalidate>
                         {% csrf_token %}
-                        <div class="form-row">
-                            <div class="form-group col-md-6">
-                                <label for="{{ form.first_name.id_for_label }}">First Name</label>
-                                {% render_field form.first_name class="form-control" %}
+                        
+                        <!-- Personal Information Section -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">Personal Information</h5>
                             </div>
-                            <div class="form-group col-md-6">
-                                <label for="{{ form.last_name.id_for_label }}">Last Name</label>
-                                {% render_field form.last_name class="form-control" %}
+                            <div class="card-body">
+                                <div class="form-row">
+                                    <div class="form-group col-md-4">
+                                        <label for="{{ form.first_name.id_for_label }}" class="font-weight-bold">First Name</label>
+                                        {{ form.first_name|add_class:"form-control" }}
+                                        {% if form.first_name.help_text %}
+                                            <small class="form-text text-muted">{{ form.first_name.help_text }}</small>
+                                        {% endif %}
+                                        {% if form.first_name.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.first_name.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <label for="{{ form.middle_name.id_for_label }}" class="font-weight-bold">Middle Name</label>
+                                        {{ form.middle_name|add_class:"form-control" }}
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <label for="{{ form.last_name.id_for_label }}" class="font-weight-bold">Last Name</label>
+                                        {{ form.last_name|add_class:"form-control" }}
+                                    </div>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group col-md-6">
+                                        <label for="{{ form.email.id_for_label }}" class="font-weight-bold">Email Address</label>
+                                        {{ form.email|add_class:"form-control" }}
+                                        {% if form.email.help_text %}
+                                            <small class="form-text text-muted">{{ form.email.help_text }}</small>
+                                        {% endif %}
+                                        {% if form.email.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.email.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="{{ form.phone_number.id_for_label }}" class="font-weight-bold">Phone Number</label>
+                                        {{ form.phone_number|add_class:"form-control" }}
+                                        <small class="form-text text-muted">Format: +2547XXXXXXXX</small>
+                                        {% if form.phone_number.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.phone_number.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label for="{{ form.meter_number.id_for_label }}">Meter Number</label>
-                            {% render_field form.meter_number class="form-control" %}
-                        </div>
-                        <div class="form-group">
-                            <label for="{{ form.address.id_for_label }}">Address</label>
-                            {% render_field form.address class="form-control" %}
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group col-md-6">
-                                <label for="{{ form.contact_number.id_for_label }}">Contact Number</label>
-                                {% render_field form.contact_number class="form-control" %}
+                        
+                        <!-- Account & Billing Information -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">Account & Billing Information</h5>
                             </div>
-                            <div class="form-group col-md-6">
-                                <label for="{{ form.status.id_for_label }}">Connection Status</label>
-                                {% render_field form.status class="form-control" %}
+                            <div class="card-body">
+                                <div class="form-row">
+                                    <div class="form-group col-md-6">
+                                        <label for="{{ form.meter_number.id_for_label }}" class="font-weight-bold">Meter Number</label>
+                                        {{ form.meter_number|add_class:"form-control" }}
+                                        {% if form.meter_number.help_text %}
+                                            <small class="form-text text-muted">{{ form.meter_number.help_text }}</small>
+                                        {% endif %}
+                                        {% if form.meter_number.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.meter_number.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="{{ form.status.id_for_label }}" class="font-weight-bold">Connection Status</label>
+                                        {{ form.status|add_class:"form-control" }}
+                                    </div>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group col-md-6">
+                                        <label for="{{ form.contact_number.id_for_label }}" class="font-weight-bold">Contact Number</label>
+                                        {{ form.contact_number|add_class:orm-control" }}
+                                        <small class="form-text text-muted">Client's primary contact number</small>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="{{ form.assigned_meter_reader.id_for_label }}" class="font-weight-bold">Assigned Meter Reader</label>
+                                        {{ form.assigned_meter_reader|add_class:"form-control" }}
+                                        <small class="form-text text-muted">Select meter reader responsible for this client</small>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="{{ form.address.id_for_label }}" class="font-weight-bold">Full Address</label>
+                                    {{ form.address|add_class:"form-control" }}
+                                    <small class="form-text text-muted">Client's complete physical address</small>
+                                </div>
                             </div>
                         </div>
-                        <div class="d-flex justify-content-center mt-4">
-                            <button type="submit" class="btn btn-primary w-25">Save Changes</button>
-                            <a href="{% url 'clients' %}" class="btn btn-secondary w-25 ml-3">Cancel</a>
+                        
+                        <!-- Form Actions -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'main:clients' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left mr-2"></i>Back to Clients
+                            </a>
+                            <div>
+                                <button type="reset" class="btn btn-outline-secondary mr-2">
+                                    <i class="fas fa-undo mr-2"></i>Reset
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save mr-2"></i>Save Changes
+                                </button>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -50,4 +130,25 @@
         </div>
     </div>
 </div>
-{% endblock content %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Enable form validation
+    (function() {
+        'use strict';
+        window.addEventListener('load', function() {
+            var forms = document.getElementsByClassName('needs-validation');
+            var validation = Array.prototype.filter.call(forms, function(form) {
+                form.addEventListener('submit', function(event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+</script>
+{% endblock %}

@@ -56,19 +56,19 @@
         <!-- Nav Item - Dashboard -->
         <li class="nav-item active">
             {% if request.user.is_superuser %}
-            <a class="nav-link" href="{% url 'dashboard' %}">
+            <a class="nav-link" href="{% url 'main:dashboard' %}">
                 <i class="fas fa-fw fa-tachometer-alt"></i>
                 <span>Dashboard</span></a>
             {% elif request.user.role == 'CUSTOMER' %}
-            <a class="nav-link" href="{% url 'client_dashboard' %}">
+            <a class="nav-link" href="{% url 'main:client_dashboard' %}">
                 <i class="fas fa-fw fa-tachometer-alt"></i>
                 <span>Dashboard</span></a>
             {% elif request.user.role == 'METER_READER' %}
-            <a class="nav-link" href="{% url 'meter_reader_dashboard' %}">
+            <a class="nav-link" href="{% url 'main:meter_reader_dashboard' %}">
                 <i class="fas fa-fw fa-tachometer-alt"></i>
                 <span>Dashboard</span></a>
             {% else %}
-             <a class="nav-link" href="{% url 'landingpage' %}">
+             <a class="nav-link" href="{% url 'account:landingpage' %}">
                 <i class="fas fa-fw fa-home"></i>
                 <span>Home</span></a>
             {% endif %}
@@ -85,7 +85,7 @@
                 </div>
 
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'clients' %}">
+                    <a class="nav-link" href="{% url 'main:clients' %}">
                         <i class="fas fa-fw fa-users"></i>
                         <span>Clients</span>
                     </a>
@@ -100,14 +100,17 @@
                     <div id="collapseBilling" class="collapse" aria-labelledby="headingBilling" data-parent="#accordionSidebar">
                         <div class="bg-white py-2 collapse-inner rounded">
                             <h6 class="collapse-header">Billing Sections:</h6>
-                            <a class="collapse-item" href="{% url 'ongoing_bills' %}">Ongoing Bills</a>
-                            <a class="collapse-item" href="{% url 'history_bills' %}">Billing History</a>
+                            <a class="collapse-item" href="{% url 'main:ongoing_bills' %}">Ongoing Bills</a>
+                            <a class="collapse-item" href="{% url 'main:history_bills' %}">Billing History</a>
+                            <a class="collapse-item" href="{% url 'main:record_payment' %}">
+                                <i class="fas fa-money-bill-wave fa-sm fa-fw mr-2"></i>Record Payment
+                            </a>
                         </div>
                     </div>
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'users' %}">
+                    <a class="nav-link" href="{% url 'main:users' %}">
                         <i class="fas fa-fw fa-user-cog"></i>
                         <span>Users</span>
                     </a>
@@ -118,14 +121,14 @@
                     Analysis & Settings
                 </div>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'reports' %}">
+                    <a class="nav-link" href="{% url 'main:reports' %}">
                         <i class="fas fa-fw fa-chart-area"></i>
                         <span>Reports</span></a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'metrics' %}">
-                        <i class="fas fa-fw fa-cogs"></i>
-                        <span>System Metrics</span></a>
+                    <a class="nav-link" href="{% url 'main:metrics' %}">
+                        <i class="fas fa-fw fa-cog"></i>
+                        <span>Metrics</span></a>
                 </li>
             {% endif %}
 
@@ -143,31 +146,14 @@
                     <div id="collapseBilling" class="collapse" aria-labelledby="headingBilling" data-parent="#accordionSidebar">
                         <div class="bg-white py-2 collapse-inner rounded">
                             <h6 class="collapse-header">Billing Sections:</h6>
-                            <a class="collapse-item" href="{% url 'ongoing_bills' %}">Ongoing Bills</a>
-                            <a class="collapse-item" href="{% url 'client_bill_history' %}">Billing History</a>
+                            <a class="collapse-item" href="{% url 'main:ongoing_bills' %}">Ongoing Bills</a>
+                            <a class="collapse-item" href="{% url 'main:history_bills' %}">Billing History</a>
                         </div>
                     </div>
                 </li>
             {% endif %}
 
-            <!-- METER READER SECTION -->
-            {% if request.user.role == 'METER_READER' %}
-                <div class="sidebar-heading">
-                    Meter Operations
-                </div>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'meter_reading' %}">
-                        <i class="fas fa-fw fa-tachometer-alt"></i>
-                        <span>Meter Reading</span>
-                    </a>
-                </li>
-                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'register_customer' %}">
-                        <i class="fas fa-user-plus fa-sm"></i>
-                        <span>Register New User</span>
-                    </a>
-                </li>
-            {% endif %}
+            <!-- Meter reader navigation is now handled on the dashboard -->
         {% endif %}
 
         <!-- Divider -->
@@ -203,17 +189,24 @@
                     <li class="nav-item dropdown no-arrow">
                         <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                             data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <span class="mr-2 d-none d-lg-inline text-gray-600 small">{% if request.user.is_superuser %} {{ request.user }} {% else %} {{ request.user.first_name }} {{ request.user.last_name }} {% endif %}</span>
-                            <img class="img-profile rounded-circle"
-                                src="{% static 'sb_admin/img/user.png' %}">
+                            <span class="mr-2 d-none d-lg-inline text-gray-600 small">
+                                {% if request.user.is_superuser %}
+                                    {{ request.user }}
+                                {% else %}
+                                    {{ request.user.get_full_name|default:request.user.email }}
+                                {% endif %}
+                            </span>
+                            <img class="img-profile rounded-circle" src="{% static 'sb_admin/img/user.png' %}">
                         </a>
                         <!-- Dropdown - User Information -->
                         <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
                             aria-labelledby="userDropdown">
-                            <a class="dropdown-item" href="{% url 'profile' request.user.id %}">
+                            {% if not request.user.role == 'METER_READER' %}
+                            <a class="dropdown-item" href="{% url 'main:profile' request.user.id %}">
                                 <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
                                 Profile
                             </a>
+                            {% endif %}
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
                                 <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
@@ -278,7 +271,7 @@
             <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                <a class="btn btn-primary" href="{% url 'logout' %}">Logout</a>
+                <a class="btn btn-primary" href="{% url 'account:logout' %}">Logout</a>
             </div>
         </div>
     </div>

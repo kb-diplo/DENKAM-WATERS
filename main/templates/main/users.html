@@ -9,9 +9,8 @@
 
     <!-- Meter Readers Table -->
     <div class="card shadow mb-4" data-aos="fade-up" data-aos-duration="1000" data-aos-easing="ease-in-out">
-        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+        <div class="card-header py-3">
             <h6 class="m-0 font-weight-bold text-primary">Meter Readers</h6>
-            <a href="{% url 'meter_reader_register' %}" class="btn btn-primary btn-sm">Add Meter Reader</a>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -29,8 +28,8 @@
                             <td> {{ user.email }} </td>
                             <td> {{ user.last_name }}, {{user.first_name}} {% if user.middle_name %} {{user.middle_name}} {% endif %}</td>
                             <td class="text-center">
-                                <a href="{% url 'update_user' user.id %}" class="btn btn-primary btn-sm"><i class="fa-regular fa-pen-to-square"></i></a>
-                                <a href="{% url 'delete_user' user.id %}" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash-can"></i></a>
+                                <a href="{% url 'main:update_user' user.id %}" class="btn btn-primary btn-sm"><i class="fa-regular fa-pen-to-square"></i></a>
+                                <a href="{% url 'main:delete_user' user.id %}" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash-can"></i></a>
                             </td>
                         </tr>   
                         {% empty %}
@@ -48,7 +47,6 @@
     <div class="card shadow mb-4" data-aos="fade-up" data-aos-duration="1000" data-aos-easing="ease-in-out">
         <div class="card-header py-3 d-flex justify-content-between align-items-center">
             <h6 class="m-0 font-weight-bold text-primary">Clients</h6>
-            <a href="{% url 'admin_register_user' %}" class="btn btn-success btn-sm">Add Client</a>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -66,8 +64,8 @@
                             <td> {{ user.email }} </td>
                             <td> {{ user.last_name }}, {{user.first_name}} {% if user.middle_name %} {{user.middle_name}} {% endif %}</td>
                             <td class="text-center">
-                                <a href="{% url 'update_user' user.id %}" class="btn btn-primary btn-sm"><i class="fa-regular fa-pen-to-square"></i></a>
-                                <a href="{% url 'delete_user' user.id %}" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash-can"></i></a>
+                                <a href="{% url 'main:update_user' user.id %}" class="btn btn-primary btn-sm"><i class="fa-regular fa-pen-to-square"></i></a>
+                                <a href="{% url 'main:delete_user' user.id %}" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash-can"></i></a>
                             </td>
                         </tr>   
                         {% empty %}

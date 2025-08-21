@@ -1,48 +1,56 @@
 {% extends 'main/layout.html' %}
-{% load widget_tweaks %}
+{% load static %}
 
-{% block content %}
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card my-5">
-                <div class="card-header">
-                    <h5 class="card-title text-center font-weight-bolder">
-                        Update Reading for {{ client.first_name }} {{ client.last_name }}
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <p><strong>Client:</strong> {{ client.first_name }} {{ client.last_name }}</p>
-                    <p><strong>Address:</strong> {{ client.address }}</p>
-                    {% if previous_bill %}
-                        <p class="card-text"><strong>Previous Reading:</strong> {{ previous_bill.reading }}</p>
-                        <p class="card-text"><strong>Previous Consumption:</strong> {{ previous_bill.meter_consumption }}</p>
-                    {% else %}
-                        <p><strong>Previous Reading:</strong> 0</p>
-                        <p><strong>Previous Consumption:</strong> 0</p>
+{% block body %}
+<div class="container-fluid">
+    <h2 class="mb-4">Add Meter Reading - {{ client.name.get_full_name|default:client.name.email }}</h2>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <form method="POST" class="needs-validation" novalidate>
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="id_reading">Current Reading (m³)</label>
+                    {{ form.reading }}
+                    {% if form.reading.errors %}
+                        <div class="text-danger">{{ form.reading.errors }}</div>
                     {% endif %}
-                    <hr>
-                    <form method="post">
-                        {% csrf_token %}
-                        <div class="form-group">
-                            <label for="{{ form.reading.id_for_label }}">New Meter Reading</label>
-                            {% render_field form.reading class="form-control" placeholder="Enter new reading" %}
-                            {% if form.reading.errors %}
-                                <div class="invalid-feedback d-block">
-                                    {{ form.reading.errors|first }}
-                                </div>
-                            {% endif %}
-                        </div>
-                        <div class="d-flex justify-content-center mt-4">
-                            <button type="submit" class="btn btn-primary w-25">
-                                Update Reading
-                            </button>
-                            <a href="{% url 'clients' %}" class="btn btn-secondary w-25 ml-3">Cancel</a>
-                        </div>
-                    </form>
                 </div>
-            </div>
+
+                <div class="form-group">
+                    <label for="id_notes">Notes (optional)</label>
+                    {{ form.notes }}
+                    {% if form.notes.errors %}
+                        <div class="text-danger">{{ form.notes.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <p><strong>Previous Reading:</strong> {{ previous_reading }} m³</p>
+
+                <button type="submit" class="btn btn-success">Submit Reading</button>
+                <button type="submit" name="next_client" class="btn btn-primary">Submit & Next Client</button>
+                <a href="{% url 'main:meter_reader_dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+            </form>
         </div>
     </div>
+
+    {% if reading_history %}
+    <div class="card shadow mb-4">
+        <div class="card-header">
+            <h6 class="m-0 font-weight-bold text-primary">Reading History (Last 10)</h6>
+        </div>
+        <div class="card-body">
+            <ul class="list-group">
+                {% for bill in reading_history %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    {{ bill.created_at|date:"M d, Y" }} - {{ bill.meter_reading.reading_value }} m³
+                    <span class="badge badge-{{ bill.status|lower }}">{{ bill.status }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% endif %}
 </div>
-{% endblock content %}
+{% endblock %}

@@ -5,59 +5,161 @@
 {{ monthly_consumption_data|json_script:"monthly-consumption-data" }}
 
 <div class="container-fluid">
-    <h3 class="text-dark mb-4">{{ title }}</h3>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="text-dark mb-0">{{ title }}</h3>
+        <a class="btn btn-success" href="{% url 'main:reports' %}?export=pdf">Download PDF Report</a>
+    </div>
 
+    <!-- Summary Cards -->
     <div class="row">
-        <div class="col-md-4">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="text-primary fw-bold m-0">Total Revenue</h6>
-                </div>
+        <div class="col-md-3 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
                 <div class="card-body">
-                    <h4 class="text-dark mb-0">Ksh {{ total_revenue|floatformat:2 }}</h4>
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Revenue</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">Ksh {{ total_revenue|floatformat:2 }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-money-bill-wave fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="text-primary fw-bold m-0">Outstanding Payments</h6>
-                </div>
+
+        <div class="col-md-3 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
                 <div class="card-body">
-                    <h4 class="text-dark mb-0">Ksh {{ outstanding_payments|floatformat:2 }}</h4>
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Outstanding Payments</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">Ksh {{ outstanding_payments|floatformat:2 }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-file-invoice-dollar fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="text-primary fw-bold m-0">Total Consumption (m³)</h6>
-                </div>
+
+        <div class="col-md-3 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
                 <div class="card-body">
-                    <h4 class="text-dark mb-0">{{ total_consumption|floatformat:2 }}</h4>
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Total Consumption</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_consumption|floatformat:2 }} m³</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-tint fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Paid Bills</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ paid_bills_count }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Disconnected Clients</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ disconnected_clients }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-plug fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Charts Section -->
     <div class="row">
         <div class="col-lg-6 mb-4">
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
-                    <h6 class="text-primary fw-bold m-0">Monthly Revenue</h6>
+                    <h6 class="m-0 font-weight-bold text-primary">Monthly Revenue</h6>
                 </div>
                 <div class="card-body">
-                    <canvas id="monthlyRevenueChart"></canvas>
+                    <div class="chart-area">
+                        <canvas id="monthlyRevenueChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
+
         <div class="col-lg-6 mb-4">
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
-                    <h6 class="text-primary fw-bold m-0">Monthly Water Consumption</h6>
+                    <h6 class="m-0 font-weight-bold text-primary">Monthly Water Consumption</h6>
                 </div>
                 <div class="card-body">
-                    <canvas id="monthlyConsumptionChart"></canvas>
+                    <div class="chart-area">
+                        <canvas id="monthlyConsumptionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Stats -->
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Billing Status Overview</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            <h4 class="text-success">{{ paid_bills_count }}</h4>
+                            <p class="mb-0">Paid Bills</p>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <h4 class="text-warning">{{ pending_bills_count }}</h4>
+                            <p class="mb-0">Pending Bills</p>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <h4 class="text-danger">{{ overdue_bills_count }}</h4>
+                            <p class="mb-0">Overdue Bills</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Quick Summary</h6>
+                </div>
+                <div class="card-body">
+                    <p>This report provides an overview of the water billing system performance including revenue, consumption, and billing status.</p>
+                    <ul>
+                        <li>Total revenue generated: Ksh {{ total_revenue|floatformat:2 }}</li>
+                        <li>Total water consumption: {{ total_consumption|floatformat:2 }} m³</li>
+                        <li>Outstanding payments: Ksh {{ outstanding_payments|floatformat:2 }}</li>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -73,16 +175,18 @@
         new Chart(revenueCtx, {
             type: 'bar',
             data: {
-                labels: revenueData.map(item => new Date(item.month).toLocaleString('default', { month: 'long', year: 'numeric' })),
+                labels: revenueData.map(item => new Date(item.month).toLocaleString('default', { month: 'long', year: 'numeric' })) || [],
                 datasets: [{
                     label: 'Revenue (Ksh)',
-                    data: revenueData.map(item => item.total),
+                    data: revenueData.map(item => item.total) || [],
                     backgroundColor: 'rgba(78, 115, 223, 0.8)',
                     borderColor: 'rgba(78, 115, 223, 1)',
                     borderWidth: 1
                 }]
             },
             options: {
+                responsive: true,
+                maintainAspectRatio: false,
                 scales: {
                     y: {
                         beginAtZero: true,
@@ -102,17 +206,49 @@
         new Chart(consumptionCtx, {
             type: 'line',
             data: {
-                labels: consumptionData.map(item => new Date(item.month).toLocaleString('default', { month: 'long', year: 'numeric' })),
-                datasets: [{
-                    label: 'Consumption (m³)',
-                    data: consumptionData.map(item => item.total),
-                    backgroundColor: 'rgba(28, 200, 138, 0.1)',
-                    borderColor: 'rgba(28, 200, 138, 1)',
-                    borderWidth: 2,
-                    fill: true
-                }]
+                labels: consumptionData.map(item => item.month) || [],
+                datasets: [
+                    {
+                        label: 'Paid (m³)',
+                        data: consumptionData.map(item => item.paid) || [],
+                        backgroundColor: 'rgba(28, 200, 138, 0.2)',
+                        borderColor: 'rgba(28, 200, 138, 1)',
+                        borderWidth: 2,
+                        fill: false,
+                        tension: 0.1
+                    },
+                    {
+                        label: 'Pending (m³)',
+                        data: consumptionData.map(item => item.pending) || [],
+                        backgroundColor: 'rgba(246, 194, 62, 0.2)',
+                        borderColor: 'rgba(246, 194, 62, 1)',
+                        borderWidth: 2,
+                        fill: false,
+                        tension: 0.1
+                    },
+                    {
+                        label: 'Overdue (m³)',
+                        data: consumptionData.map(item => item.overdue) || [],
+                        backgroundColor: 'rgba(231, 74, 59, 0.2)',
+                        borderColor: 'rgba(231, 74, 59, 1)',
+                        borderWidth: 2,
+                        fill: false,
+                        tension: 0.1
+                    },
+                    {
+                        label: 'Total (m³)',
+                        data: consumptionData.map(item => item.total) || [],
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 2,
+                        fill: false,
+                        tension: 0.1
+                    }
+                ]
             },
             options: {
+                responsive: true,
+                maintainAspectRatio: false,
                 scales: {
                     y: {
                         beginAtZero: true,

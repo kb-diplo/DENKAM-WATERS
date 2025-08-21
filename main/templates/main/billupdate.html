@@ -8,7 +8,8 @@
 <form action="" method="POST" class="user" enctype="multipart/form-data">
     {% csrf_token %}
     <div class="form-group mt-3">
-        <label>Name: </label> <br>
+        <label>Client Name: </label> <br>
+        {{ form.client_name }}
         {{ form.name }}
     </div>
     <div class="form-group mt-3">

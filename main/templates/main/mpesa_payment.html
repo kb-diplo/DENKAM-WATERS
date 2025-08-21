@@ -1,0 +1,157 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Pay with M-Pesa</h4>
+                    <p class="card-category">Bill #{{ bill.id }} - {{ bill.name.get_full_name|default:bill.name.username }}</p>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title">Bill Summary</h5>
+                                </div>
+                                <div class="card-body">
+                                    <table class="table">
+                                        <tr>
+                                            <th>Billing Period:</th>
+                                            <td>{{ bill.billing_month|date:"F Y" }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Previous Reading:</th>
+                                            <td>{{ bill.previous_reading|floatformat:2 }} m³</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Current Reading:</th>
+                                            <td>{{ bill.current_reading|floatformat:2 }} m³</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Consumption:</th>
+                                            <td>{{ bill.meter_consumption|floatformat:2 }} m³</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Total Amount:</th>
+                                            <td>KSh {{ payable_amount|floatformat:2 }}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title">Payment Details</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form method="post" id="mpesaPaymentForm">
+                                        {% csrf_token %}
+                                        <div class="form-group">
+                                            <label for="id_amount">Amount to Pay (KSh)</label>
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">KSh</span>
+                                                </div>
+                                                {{ form.amount }}
+                                            </div>
+                                            <small class="form-text text-muted">
+                                                Maximum payable amount: KSh {{ payable_amount|floatformat:2 }}
+                                            </small>
+                                            {% if form.amount.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.amount.errors|join:", " }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label for="id_phone_number">M-Pesa Phone Number</label>
+                                            {{ form.phone_number }}
+                                            <small class="form-text text-muted">
+                                                Format: 2547XXXXXXXX or 07XXXXXXXX
+                                            </small>
+                                            {% if form.phone_number.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.phone_number.errors|join:", " }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <button type="submit" class="btn btn-success btn-block" id="payButton">
+                                                <i class="fas fa-mobile-alt"></i> Pay with M-Pesa
+                                            </button>
+                                            <a href="{% url 'main:client_bill_history' %}" class="btn btn-secondary btn-block mt-2">
+                                                <i class="fas fa-arrow-left"></i> Back to Bills
+                                            </a>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info mt-3">
+                        <h5><i class="fas fa-info-circle"></i> Payment Instructions</h5>
+                        <ol>
+                            <li>Enter the amount you wish to pay (up to the total bill amount).</li>
+                            <li>Enter your M-Pesa registered phone number.</li>
+                            <li>Click "Pay with M-Pesa" button.</li>
+                            <li>Enter your M-Pesa PIN when prompted on your phone.</li>
+                            <li>Wait for the payment confirmation message.</li>
+                        </ol>
+                        <p class="mb-0"><strong>Note:</strong> A confirmation message will be sent to your phone and email once payment is received.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Format phone number as user types
+    $('#id_phone_number').on('input', function() {
+        let value = $(this).val().replace(/\D/g, '');
+        if (value.startsWith('0') && value.length <= 10) {
+            value = '254' + value.substring(1);
+        } else if (value.startsWith('7') && value.length == 9) {
+            value = '254' + value;
+        }
+        $(this).val(value);
+    });
+    
+    // Validate amount doesn't exceed payable amount
+    $('#mpesaPaymentForm').on('submit', function(e) {
+        const amount = parseFloat($('#id_amount').val());
+        const maxAmount = parseFloat('{{ payable_amount }}');
+        
+        if (amount > maxAmount) {
+            e.preventDefault();
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid Amount',
+                text: `Amount cannot exceed KSh ${maxAmount.toFixed(2)}`,
+                confirmButtonText: 'OK'
+            });
+            return false;
+        }
+        
+        // Show loading state
+        const payButton = $('#payButton');
+        payButton.prop('disabled', true);
+        payButton.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...');
+    });
+});
+</script>
+{% endblock %}

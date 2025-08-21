@@ -4,24 +4,49 @@
 {% block body %}
 
 <div class="container"> 
-    <h1 class="h3 mb-2 text-primary text-center font-weight-bolder">Update {{ event }}</h1><br>
-<form action="" method="POST" class="user" enctype="multipart/form-data">
+    <h1 class="h3 mb-2 text-primary text-center font-weight-bolder">Update {{ user.first_name }} {{ user.last_name }}</h1><br>
+<form action="" method="POST" class="user">
     {% csrf_token %}
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            {{ form.non_field_errors }}
+        </div>
+    {% endif %}
     <div class="form-group">
         <label> <b> Email: </b> </label>
         {{ form.email }}
+        {% if form.email.errors %}
+            <div class="text-danger">
+                {{ form.email.errors }}
+            </div>
+        {% endif %}
     </div>
     <div class="form-group">
         <label> <b> Last Name: </b> </label>
         {{ form.last_name }}
+        {% if form.last_name.errors %}
+            <div class="text-danger">
+                {{ form.last_name.errors }}
+            </div>
+        {% endif %}
     </div>
     <div class="form-group">
         <label> <b> First Name: </b> </label>
         {{ form.first_name }}
+        {% if form.first_name.errors %}
+            <div class="text-danger">
+                {{ form.first_name.errors }}
+            </div>
+        {% endif %}
     </div>
     <div class="form-group">
         <label> <b> Password: </b> </label>
         {{ form.password }}
+        {% if form.password.errors %}
+            <div class="text-danger">
+                {{ form.password.errors }}
+            </div>
+        {% endif %}
     </div>
 
    <div class="d-flex justify-content-center">

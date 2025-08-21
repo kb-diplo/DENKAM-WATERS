@@ -1,0 +1,564 @@
+{% extends 'main/layout.html' %}
+{% load static %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800"><i class="fas fa-credit-card mr-2"></i>Record Payment</h1>
+        <a href="{% url 'main:dashboard' %}" class="btn btn-secondary btn-sm">
+            <i class="fas fa-arrow-left mr-1"></i>Back to Dashboard
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Payment Details</h6>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{% url 'main:record_payment' %}" id="paymentForm" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="form-group row mb-4">
+                            <label for="id_bill" class="col-sm-3 col-form-label">Select Bill</label>
+                            <div class="col-sm-9">
+                                {{ form.bill }}
+                                {% if form.bill.errors %}
+                                    <div class="text-danger">{{ form.bill.errors }}</div>
+                                {% endif %}
+                                <small class="form-text text-muted">{{ form.bill.help_text }}</small>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group row mb-4">
+                            <label for="id_payment_method" class="col-sm-3 col-form-label">Payment Method</label>
+                            <div class="col-sm-9">
+                                {{ form.payment_method }}
+                                {% if form.payment_method.errors %}
+                                    <div class="text-danger">{{ form.payment_method.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="form-group row mb-4">
+                            <label for="id_amount" class="col-sm-3 col-form-label">Amount (KSh)</label>
+                            <div class="col-sm-9">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">KSh</span>
+                                    </div>
+                                    {{ form.amount }}
+                                </div>
+                                {% if form.amount.errors %}
+                                    <div class="text-danger">{{ form.amount.errors }}</div>
+                                {% endif %}
+                                <small class="form-text text-muted">{{ form.amount.help_text }}</small>
+                            </div>
+                        </div>
+
+                        <div class="form-group row mb-4">
+                            <label for="id_reference_number" class="col-sm-3 col-form-label">Payment Reference</label>
+                            <div class="col-sm-9">
+                                {{ form.reference_number }}
+                                <small class="form-text text-muted">{{ form.reference_number.help_text }}</small>
+                                {% if form.reference_number.errors %}
+                                    <div class="text-danger">{{ form.reference_number.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="form-group row mb-4">
+                            <label for="id_payment_date" class="col-sm-3 col-form-label">Payment Date</label>
+                            <div class="col-sm-9">
+                                {{ form.payment_date }}
+                                <small class="form-text text-muted">{{ form.payment_date.help_text }}</small>
+                                {% if form.payment_date.errors %}
+                                    <div class="text-danger">{{ form.payment_date.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="form-group row mb-4">
+                            <label for="id_notes" class="col-sm-3 col-form-label">Notes</label>
+                            <div class="col-sm-9">
+                                {{ form.notes }}
+                                <small class="form-text text-muted">{{ form.notes.help_text }}</small>
+                                {% if form.notes.errors %}
+                                    <div class="text-danger">{{ form.notes.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="form-group row mt-4">
+                            <div class="col-sm-9 offset-sm-3">
+                                <button type="submit" class="btn btn-primary" id="submitBtn">
+                                    <i class="fas fa-save mr-2"></i>Record Payment
+                                </button>
+                                <a href="{% url 'main:dashboard' %}" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
+                                </a>
+                                <div id="formErrors" class="text-danger mt-2" style="display: none;"></div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Recent Payments Card -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Recent Payments</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="recentPaymentsTable" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Client</th>
+                                    <th>Amount</th>
+                                    <th>Method</th>
+                                    <th>Reference</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for payment in recent_payments %}
+                                <tr>
+                                    <td>{{ payment.payment_date|date:"M d, Y H:i" }}</td>
+                                    <td>{{ payment.client_name }}</td>
+                                    <td>KSh {{ payment.amount|floatformat:2 }}</td>
+                                    <td>{{ payment.payment_method }}</td>
+                                    <td>{{ payment.reference_number }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center">No recent payments found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include 'snippets/form_js.html' %}
+
+<!-- Add Select2 CSS and JS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    // Initialize Select2 for bill selection
+    $('#id_bill').select2({
+        placeholder: 'Select a bill to pay',
+        allowClear: true,
+        width: '100%'
+    });
+
+    // When a bill is selected, auto-fill the amount
+    $('#id_bill').on('change', function() {
+        const billId = $(this).val();
+        if (billId) {
+            // Extract amount from the selected option text (format: "Client Name - Bill #123 - KSh 1,234.56")
+            const selectedText = $(this).find('option:selected').text();
+            const amountMatch = selectedText.match(/KSh\s*([\d,]+(?:\.[\d]{2})?)/);
+            
+            if (amountMatch && amountMatch[1]) {
+                const amount = amountMatch[1].replace(/,/g, '');
+                $('#id_amount').val(amount);
+            }
+        } else {
+            $('#id_amount').val('');
+        }
+    });
+
+    // Format amount field on blur
+    $('#id_amount').on('blur', function() {
+        const value = $(this).val();
+        if (value) {
+            const num = parseFloat(value).toFixed(2);
+            $(this).val(num);
+        }
+    });
+
+    // Form validation and AJAX submission
+    (function() {
+        'use strict';
+        
+        const form = document.getElementById('paymentForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const formErrors = document.getElementById('formErrors');
+        
+        // Format date for display
+        function formatDate(dateString) {
+            try {
+                const date = new Date(dateString);
+                // Check if date is valid
+                if (isNaN(date.getTime())) {
+                    return 'Invalid Date';
+                }
+                const options = {
+                    year: 'numeric', 
+                    month: 'short', 
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false
+                };
+                return date.toLocaleString('en-US', options);
+            } catch (error) {
+                console.error('Date formatting error:', error);
+                return 'Invalid Date';
+            }
+        }
+        
+        // Format currency
+        function formatCurrency(amount) {
+            return 'KSh ' + parseFloat(amount).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+        }
+        
+        // Add a new payment to the recent payments table
+        function addPaymentToTable(payment) {
+            const tbody = document.querySelector('#recentPaymentsTable tbody');
+            const newRow = document.createElement('tr');
+            
+            newRow.innerHTML = `
+                <td>${formatDate(payment.date)}</td>
+                <td>${payment.client_name}</td>
+                <td>${formatCurrency(payment.amount)}</td>
+                <td>${payment.method}</td>
+                <td>${payment.reference}</td>
+            `;
+            
+            // Insert the new row at the top of the table
+            if (tbody.firstChild) {
+                tbody.insertBefore(newRow, tbody.firstChild);
+            } else {
+                tbody.appendChild(newRow);
+            }
+            
+            // If there was a "no payments" message, remove it
+            const emptyRow = tbody.querySelector('tr td[colspan="5"]');
+            if (emptyRow && emptyRow.textContent === 'No recent payments found') {
+                emptyRow.parentNode.remove();
+            }
+        }
+        
+        // Handle form submission
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            // Validate form
+            if (!form.checkValidity()) {
+                event.stopPropagation();
+                form.classList.add('was-validated');
+                return false;
+            }
+            
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
+            formErrors.textContent = '';
+            
+            // Prepare form data
+            const formData = new FormData(form);
+            
+            // Send AJAX request
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Reset form and clear any validation
+                    form.reset();
+                    form.classList.remove('was-validated');
+                    
+                    // Clear any selected values in select2 dropdowns
+                    if ($.fn.select2) {
+                        $('#id_bill').val(null).trigger('change');
+                        $('#id_payment_method').val('Cash').trigger('change');
+                    }
+                    
+                    // Clear specific form fields
+                    document.getElementById('id_amount').value = '';
+                    document.getElementById('id_reference_number').value = '';
+                    document.getElementById('id_payment_date').value = '';
+                    const notesField = document.getElementById('id_notes');
+                    if (notesField) {
+                        notesField.value = '';
+                    }
+                    
+                    // Clear any remaining validation errors
+                    form.querySelectorAll('.is-invalid').forEach(el => {
+                        el.classList.remove('is-invalid');
+                    });
+                    
+                    // Clear any error messages
+                    form.querySelectorAll('.invalid-feedback').forEach(el => {
+                        el.remove();
+                    });
+                    
+                    // Add new payment to the table
+                    addPaymentToTable(data.payment);
+                    
+                    // Show success message
+                    sweetAlert({
+                        title: 'Success!',
+                        text: data.message,
+                        icon: 'success',
+                        timer: 3000,
+                        buttons: false
+                    });
+                    
+                    // Update the bill status in the UI if we're on the client's billing page
+                    updateBillStatus(data.payment.bill_id || null);
+                    
+                    // Focus on the first input field for the next entry
+                    const firstInput = form.querySelector('input, select, textarea');
+                    if (firstInput) {
+                        firstInput.focus();
+                    }
+                } else {
+                    throw new Error(data.message || 'An error occurred');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                formErrors.textContent = error.message || 'An error occurred while processing your payment.';
+                formErrors.style.display = 'block';
+            })
+            .finally(() => {
+                // Reset button state
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-save mr-2"></i>Record Payment';
+            });
+            
+            return false;
+        });
+        
+        // Update bill status in the UI (if on client billing page)
+        function updateBillStatus(billId) {
+            if (!billId) return;
+            
+            // Find and update the bill status in the UI
+            const billRow = document.querySelector(`tr[data-bill-id="${billId}"]`);
+            if (billRow) {
+                const statusCell = billRow.querySelector('.bill-status');
+                if (statusCell) {
+                    statusCell.textContent = 'Paid';
+                    statusCell.className = 'text-success font-weight-bold';
+                }
+                
+                // Remove any action buttons
+                const actionCell = billRow.querySelector('.bill-actions');
+                if (actionCell) {
+                    actionCell.innerHTML = '<span class="text-success"><i class="fas fa-check-circle"></i> Paid</span>';
+                }
+            }
+        }
+        
+        // Clear validation on input change
+        form.querySelectorAll('input, select, textarea').forEach(input => {
+            input.addEventListener('input', function() {
+                if (this.checkValidity()) {
+                    this.classList.remove('is-invalid');
+                    const errorDiv = this.parentNode.querySelector('.invalid-feedback');
+                    if (errorDiv) {
+                        errorDiv.remove();
+                    }
+                }
+            });
+        });
+        
+        // Custom validation for amount field
+        const amountField = document.getElementById('id_amount');
+        if (amountField) {
+            amountField.addEventListener('change', function() {
+                const amount = parseFloat(this.value);
+                if (isNaN(amount) || amount <= 0) {
+                    this.setCustomValidity('Please enter a valid amount greater than zero.');
+                } else {
+                    this.setCustomValidity('');
+                }
+            });
+        }
+    })();
+});
+</script>
+
+<style>
+/* Improve Select2 dropdown styling */
+.select2-container--default .select2-selection--single {
+    height: calc(1.5em + 0.75rem + 2px);
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #6e707e;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #d1d3e2;
+    border-radius: 0.35rem;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 100%;
+}
+</style>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    // Initialize select2 for bill selection
+    $('#id_bill').select2({
+        placeholder: 'Select a bill to pay',
+        allowClear: true,
+        width: '100%'
+    });
+    
+    // Autofill payment amount when bill is selected
+    $('#id_bill').on('change', function() {
+        const billId = $(this).val();
+        const amountField = $('#id_amount');
+        
+        if (billId) {
+            // Show loading state
+            amountField.prop('disabled', true).val('Loading...');
+            
+            // Fetch bill details
+            $.ajax({
+                url: '{% url "main:get_bill_details" %}',
+                type: 'GET',
+                data: {
+                    'bill_id': billId
+                },
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Autofill the amount with the bill's payable amount
+                        amountField.val(response.bill_amount.toFixed(2));
+                        
+                        // Show bill details in a small info box
+                        const billInfo = `
+                            <div class="alert alert-info alert-dismissible fade show mt-2" role="alert" id="bill-info">
+                                <strong>Bill Details:</strong><br>
+                                Client: ${response.client_name}<br>
+                                Consumption: ${response.consumption} m³<br>
+                                Penalty: KSh ${response.penalty.toFixed(2)}<br>
+                                Total Payable: <strong>KSh ${response.bill_amount.toFixed(2)}</strong>
+                                <button type="button" class="close" data-dismiss="alert">
+                                    <span>&times;</span>
+                                </button>
+                            </div>
+                        `;
+                        
+                        // Remove existing bill info and add new one
+                        $('#bill-info').remove();
+                        $('#bill-select').closest('.form-group').after(billInfo);
+                    } else {
+                        amountField.val('');
+                        alert('Error loading bill details: ' + response.error);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    amountField.val('');
+                    alert('Error loading bill details. Please try again.');
+                },
+                complete: function() {
+                    // Re-enable the amount field
+                    amountField.prop('disabled', false);
+                }
+            });
+        } else {
+            // Clear amount and bill info when no bill is selected
+            amountField.val('');
+            $('#bill-info').remove();
+        }
+    });
+    
+    // Format amount field on blur
+    $('#id_amount').on('blur', function() {
+        let value = parseFloat($(this).val());
+        if (!isNaN(value) && value > 0) {
+            $(this).val(value.toFixed(2));
+        }
+    });
+    
+    // Auto-hide alerts after 5 seconds
+    setTimeout(function() {
+        $('.alert:not(#bill-info)').fadeOut('slow');
+    }, 5000);
+});
+</script>
+
+<style>
+    /* Select2 styling to match Bootstrap */
+    .select2-container--default .select2-selection--single {
+        height: calc(1.5em + 0.75rem + 2px);
+        padding: 0.375rem 0.75rem;
+        font-size: 1rem;
+        font-weight: 400;
+        line-height: 1.5;
+        color: #6e707e;
+        background-color: #fff;
+        background-clip: padding-box;
+        border: 1px solid #d1d3e2;
+        border-radius: 0.35rem;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+    
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 100%;
+    }
+    
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 1.5;
+        padding-left: 0;
+    }
+    
+    .select2-container--default .select2-selection--single .select2-selection__placeholder {
+        color: #6c757d;
+    }
+    
+    .select2-container--default.select2-container--focus .select2-selection--single {
+        border-color: #bac8f3;
+        box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+    }
+    
+    /* Make sure the form controls have consistent height */
+    .form-control, .select2-container--default .select2-selection--single {
+        height: calc(1.5em + 0.75rem + 2px);
+    }
+    
+    /* Style the amount input */
+    #id_amount {
+        text-align: right;
+    }
+    
+    /* Style the recent payments table */
+    #recentPaymentsTable {
+        font-size: 0.9rem;
+    }
+    
+    #recentPaymentsTable th {
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.7rem;
+        letter-spacing: 0.5px;
+    }
+</style>
+{% endblock %}
