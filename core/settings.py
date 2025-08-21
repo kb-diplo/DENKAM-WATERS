@@ -19,11 +19,11 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'a-default-secret-key-for-local-development
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'True').lower() in ('true', '1', 't')
 
-CSRF_TRUSTED_ORIGINS = ['http://localhost:8000', 'http://127.0.0.1:8000', 'http://localhost', 'http://127.0.0.1']
+CSRF_TRUSTED_ORIGINS = ['https://kbdiploo.pythonanywhere.com', 'http://localhost:8000', 'http://127.0.0.1:8000', 'http://localhost', 'http://127.0.0.1']
 
-CORS_ALLOWED_ORIGINS = ['http://localhost:8000', 'http://127.0.0.1:8000', 'http://localhost', 'http://127.0.0.1']
+CORS_ALLOWED_ORIGINS = ['https://kbdiploo.pythonanywhere.com', 'http://localhost:8000', 'http://127.0.0.1:8000', 'http://localhost', 'http://127.0.0.1']
 
-ALLOWED_HOSTS = ['.vercel.app', '127.0.0.1', 'localhost', os.environ.get('VERCEL_URL', 'localhost')]
+ALLOWED_HOSTS = ['kbdiploo.pythonanywhere.com', '127.0.0.1', 'localhost', '.pythonanywhere.com']
 
 AUTH_USER_MODEL = 'account.Account'
 LOGIN_URL = 'account:login'
