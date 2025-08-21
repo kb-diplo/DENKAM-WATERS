@@ -11,7 +11,7 @@ class AccountManager(UserManager):
     def _create_user(self, email, password, **extra_fields):
         email = self.normalize_email(email)
         user = Account(email=email, **extra_fields)
-        user.password = make_password(password)
+        user.set_password(password)
         user.save(using=self._db)
         return user
 
@@ -42,7 +42,6 @@ class Account(AbstractUser):
     email = models.EmailField(unique=True)
     phone_number = models.CharField(max_length=20, null=True, blank=True)
     role = models.CharField(max_length=50, choices=Role.choices, default=Role.CUSTOMER)
-    otp = models.IntegerField(null=True)
     verified = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
