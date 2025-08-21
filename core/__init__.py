@@ -12,3 +12,10 @@ Core application initialization.
 #     base.utc_tzinfo_factory = patched_utc_tzinfo_factory
 # except ImportError:
 #     pass
+
+# Use PyMySQL as MySQL driver if mysqlclient is not available
+try:
+    import MySQLdb
+except ImportError:
+    import pymysql
+    pymysql.install_as_MySQLdb()
