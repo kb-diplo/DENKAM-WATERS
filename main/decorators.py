@@ -13,7 +13,7 @@ def verified_or_superuser(function):
         if profile.verified or profile.is_superuser:
              return function(request, *args, **kwargs)
         else:
-            return HttpResponseRedirect(reverse('verify'))
+            return HttpResponseRedirect(reverse('account:login'))
 
   return wrap
 
