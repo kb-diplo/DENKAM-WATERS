@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import redirect
 from .models import Account
 
-def admin_required(function=None, redirect_field_name=None, login_url='login'):
+def admin_required(function=None, redirect_field_name=None, login_url='account:login'):
     '''
     Decorator for views that checks that the user is an admin.
     '''
@@ -15,7 +15,7 @@ def admin_required(function=None, redirect_field_name=None, login_url='login'):
         return actual_decorator(function)
     return actual_decorator
 
-def meter_reader_required(function=None, redirect_field_name=None, login_url='login'):
+def meter_reader_required(function=None, redirect_field_name=None, login_url='account:login'):
     '''
     Decorator for views that checks that the user is a meter reader.
     '''
@@ -28,7 +28,7 @@ def meter_reader_required(function=None, redirect_field_name=None, login_url='lo
         return actual_decorator(function)
     return actual_decorator
 
-def customer_required(function=None, redirect_field_name=None, login_url='login'):
+def customer_required(function=None, redirect_field_name=None, login_url='account:login'):
     '''
     Decorator for views that checks that the user is a customer.
     '''
@@ -41,7 +41,7 @@ def customer_required(function=None, redirect_field_name=None, login_url='login'
         return actual_decorator(function)
     return actual_decorator
 
-def customer_or_admin_required(function=None, redirect_field_name=None, login_url='login'):
+def customer_or_admin_required(function=None, redirect_field_name=None, login_url='account:login'):
     '''
     Decorator for views that checks that the user is a customer or an admin.
     '''
@@ -54,7 +54,7 @@ def customer_or_admin_required(function=None, redirect_field_name=None, login_ur
         return actual_decorator(function)
     return actual_decorator
 
-def admin_or_meter_reader_required(function=None, redirect_field_name=None, login_url='login'):
+def admin_or_meter_reader_required(function=None, redirect_field_name=None, login_url='account:login'):
     '''
     Decorator for views that checks that the user is an admin or a meter reader.
     '''

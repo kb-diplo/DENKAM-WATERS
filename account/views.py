@@ -3,9 +3,10 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.core.mail import send_mail
 from django.urls import reverse
+from .forms import MeterReaderRegistrationForm
 from django.contrib.auth.decorators import login_required, user_passes_test
 from .decorators import admin_required, meter_reader_required
-from .forms import CustomerRegistrationForm, MeterReaderRegistrationForm, RegistrationForm, VerificationForm, AdminRegistrationForm, AdminUserCreationForm
+from .forms import CustomerRegistrationForm, MeterReaderRegistrationForm, RegistrationForm, AdminRegistrationForm, AdminUserCreationForm
 from main.models import *
 from django.conf import settings
 import sweetify
@@ -17,53 +18,54 @@ def landingpage(request):
     return render(request, 'account/landingpage.html')
 
 
-def generate_otp():
-    otp = ""
-    for i in range(r.randint(5, 8)):
-        otp += str(r.randint(1, 9))
-    return otp
+
 
 
 def login_view(request):
     role = request.GET.get('role')
-
+    
+    # If this is a POST request, process the form data
     if request.method == 'POST':
-        email = request.POST['email']
-        password = request.POST['password']
+        # Get the email and password from the POST data
+        email = request.POST.get('email', '').strip()
+        password = request.POST.get('password', '')
+        
+        # Basic validation
+        if not email or not password:
+            return render(request, 'account/login.html', {
+                'error': 'Please provide both email and password',
+                'role': role,
+                'email': email
+            })
+        
+        # Authenticate the user
         user = authenticate(request, email=email, password=password)
+        
         if user is not None:
-            if not user.verified:
-                # If user is not verified, send OTP for email verification.
-                otp = generate_otp()
-                user.otp = otp
-                user.save()
-
-                # Send OTP to user's email
-                subject = 'Verify Your Email Address'
-                message = f'Welcome! Your verification code is: {otp}'
-                from_email = settings.EMAIL_HOST_USER
-                recipient_list = [user.email]
-                send_mail(subject, message, from_email, recipient_list)
-
-                login(request, user)
-                return HttpResponseRedirect(reverse('verify'))
-            
-            # If user is already verified, log them in directly.
+            # Log the user in
             login(request, user)
-            sweetify.success(request, 'Login Successfully')
+            sweetify.success(request, 'Login Successful')
+            
+            # Redirect based on user role
             if user.role == Account.Role.ADMIN:
                 if not Metric.objects.exists():
-                    Metric.objects.create(consump_amount=1, penalty_amount=1)
-                return HttpResponseRedirect(reverse('dashboard'))
+                    Metric.objects.create(consumption_rate=1, penalty_rate=1)
+                return HttpResponseRedirect(reverse('main:dashboard'))
             elif user.role == Account.Role.METER_READER:
-                return HttpResponseRedirect(reverse('meter_reader_dashboard'))
+                return HttpResponseRedirect(reverse('main:meter_reader_dashboard'))
             elif user.role == Account.Role.CUSTOMER:
-                return HttpResponseRedirect(reverse('client_dashboard'))
+                return HttpResponseRedirect(reverse('main:client_dashboard'))
             else:
-                return HttpResponseRedirect(reverse('landingpage'))
+                return HttpResponseRedirect(reverse('main:landingpage'))
         else:
-            sweetify.error(request, 'Invalid Credentials')
-            return render(request, 'account/login.html', {'error': 'Invalid Credentials', 'role': role})
+            # Return an 'invalid login' error message
+            return render(request, 'account/login.html', {
+                'error': 'Invalid email or password. Please try again.',
+                'role': role,
+                'email': email
+            })
+    
+    # If this is a GET request, just show the login form
 
     # Clear any existing messages
     storage = messages.get_messages(request)
@@ -72,47 +74,18 @@ def login_view(request):
     return render(request, 'account/login.html', {'role': role})
 
 
-def verify(request):
-    otp_form = VerificationForm()
-    context = {
-        'otp_form': otp_form
-    }
-    if request.method == 'POST':
-        user = request.user
-        otp_form = VerificationForm(request.POST)
-        user_otp = request.POST['otp']
-        otp = int(user_otp)
-        if otp == user.otp:
-            user = request.user
-            user.verified = True
-            user.save()
-            sweetify.success(request, 'Verification successful. Welcome!')
-            # Redirect to the appropriate dashboard based on user role
-            if user.role == Account.Role.ADMIN:
-                return HttpResponseRedirect(reverse('dashboard'))
-            elif user.role == Account.Role.METER_READER:
-                return HttpResponseRedirect(reverse('meter_reader_dashboard'))
-            elif user.role == Account.Role.CUSTOMER:
-                return HttpResponseRedirect(reverse('ongoing_bills'))
-            else:
-                return HttpResponseRedirect(reverse('landingpage'))
-        else:
-            print("failed")
-            return render(request, 'account/verify.html', {'error': 'OTP is incorrect!', 'otp_form': otp_form})
 
-    return render(request, 'account/verify.html', context)
 
 
 
 
 
 def logout_view(request):
-    user_role = request.user.role
+    """
+    Logs out the user and redirects to the login page.
+    """
     logout(request)
-    if user_role == Account.Role.ADMIN or user_role == Account.Role.METER_READER:
-        return redirect('login')
-    else:
-        return redirect('landingpage')
+    return redirect('account:login')
 
 
 def customer_register_view(request):
@@ -183,50 +156,108 @@ def meter_reader_register_view(request):
     return render(request, 'account/meter_reader_register.html', context)
 
 
-@login_required(login_url='login')
+@login_required(login_url='account:login')
 @admin_required
 def admin_register_user_view(request):
     """
-    Allows an admin to register a new user (Customer or Meter Reader) using a unified form.
+    Allows an admin to register a new client account with enhanced form handling.
     """
     if request.method == 'POST':
-        form = AdminUserCreationForm(request.POST)
+        form = CustomerRegistrationForm(request.POST)
         if form.is_valid():
-            role = form.cleaned_data['role']
-            
-            # Create the user account
-            user = Account.objects.create_user(
-                email=form.cleaned_data['email'],
-                first_name=form.cleaned_data['first_name'],
-                last_name=form.cleaned_data['last_name'],
-                password=None  # A password can be set or generated here
-            )
-            user.role = role
-            user.save()
-
-            # If the user is a customer, create their client profile
-            if role == Account.Role.CUSTOMER:
-                Client.objects.create(
-                    name=user,
-                    contact_number=form.cleaned_data['contact_number'],
-                    address=form.cleaned_data['address']
+            try:
+                # Save the user and create client profile (handled in form's save method)
+                user = form.save()
+                
+                # Log the action
+                logger.info(f'Admin {request.user.email} created new client account: {user.email}')
+                
+                sweetify.success(
+                    request,
+                    'Client account created successfully!',
+                    text=f'Account for {user.get_full_name()} has been created.',
+                    persistent='OK'
                 )
-
-            sweetify.success(request, f'{user.get_role_display()} account created successfully!')
-            return HttpResponseRedirect(reverse('users'))
+                return redirect('main:clients')
+                
+            except Exception as e:
+                logger.error(f'Error creating client account: {str(e)}')
+                sweetify.error(
+                    request,
+                    'Error creating account',
+                    text='An error occurred while creating the client account. Please try again.',
+                    persistent='OK'
+                )
         else:
-            sweetify.error(request, 'Please correct the errors below.')
+            # Form is invalid, show error messages
+            error_messages = []
+            for field, errors in form.errors.items():
+                field_label = field.replace('_', ' ').title()
+                for error in errors:
+                    error_messages.append(f"{field_label}: {error}")
+            
+            sweetify.error(
+                request,
+                'Please correct the errors below',
+                text='\n'.join(error_messages) or 'There was an error with your submission.',
+                persistent='OK'
+            )
     else:
-        form = AdminUserCreationForm()
+        form = CustomerRegistrationForm()
 
     context = {
-        'title': 'Register New User',
+        'title': 'Register New Client',
         'form': form,
+        'active_tab': 'clients',
     }
     return render(request, 'account/admin_register_user.html', context)
 
 
-@login_required(login_url='login')
+@login_required(login_url='account:login')
+@admin_required
+def admin_register_meter_reader_view(request):
+    """
+    Allows an admin to register a new meter reader account.
+    """
+    if request.method == 'POST':
+        form = MeterReaderRegistrationForm(request.POST)
+        if form.is_valid():
+            try:
+                user = form.save(commit=True)
+                sweetify.success(
+                    request, 
+                    'Meter Reader account created successfully!',
+                    text=f'Login credentials have been sent to {user.email}.'
+                )
+                return redirect('main:users')
+            except Exception as e:
+                logging.error(f"Error creating meter reader account: {str(e)}")
+                sweetify.error(
+                    request,
+                    'Error creating meter reader account',
+                    text=str(e),
+                    persistent=True
+                )
+        else:
+            sweetify.error(
+                request,
+                'Please correct the errors below',
+                persistent=True
+            )
+    else:
+        form = MeterReaderRegistrationForm()
+
+    context = {
+        'title': 'Register New Meter Reader',
+        'form': form,
+    }
+    # Debug output
+    print("Rendering template with form:", form)
+    print("Form fields:", form.fields.keys())
+    return render(request, 'account/admin_register_meter_reader.html', context)
+
+
+@login_required(login_url='account:login')
 @meter_reader_required
 def meter_reader_register_user_view(request):
     form = CustomerRegistrationForm()
@@ -237,7 +268,7 @@ def meter_reader_register_user_view(request):
             user.role = Account.Role.CUSTOMER
             user.save()
             sweetify.success(request, 'Client account created successfully!')
-            return redirect('meter_reader_dashboard')
+            return redirect('account:meter_reader_dashboard')
     context = {
         'form': form,
         'title': 'Register Client'
